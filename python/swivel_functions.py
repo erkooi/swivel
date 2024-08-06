@@ -341,19 +341,20 @@ def approximate_phi_output_yz_as_function_of_theta_mid(theta_mid_arr,
     print('. f0_ampl = %.3f, f1_ampl = %.3f, f1_angle = %.1f)' % (f0_ampl, f1_ampl, f1_angle))
 
     # Approximate phi_output_yz using single harmonic approximation
-    # . convert f1_phi_output_yz_arr part into expression with only
-    #   sin(theta_mid) or cos(theta_mid)
-    # . identity: cos(t) = sin(t + 90)
+    # . convert f1_phi_output_yz_arr part into expression with sin(theta_mid)
+    #   using identity: cos(t) = sin(t + 90).
     f1 = 1
     if np.round(f1_angle) == 90:
         print('. Use cos(t + 90) = sin(t + 180) = -sin(t)')
         f1_phi_output_yz_arr = -f1_ampl * np.sin(np.radians(f1 * theta_mid_arr))
     elif np.round(f1_angle) == -90:
-        print('. Use cos(t - 90) = sin(t)')
-        f1_phi_output_yz_arr = f1_ampl * np.sin(np.radians(f1 * theta_mid_arr))
+        print('. Unexpected f1_angle = %f' % f1_angle)
+        # print('. Use cos(t - 90) = sin(t)')
+        # f1_phi_output_yz_arr = f1_ampl * np.sin(np.radians(f1 * theta_mid_arr))
     else:
-        print('. Keep cos(t + f1_angle)')
-        f1_phi_output_yz_arr = f1_ampl * np.cos(np.radians(f1 * theta_mid_arr + f1_angle))
+        print('. Unexpected f1_angle = %f' % f1_angle)
+        # print('. Keep cos(t + f1_angle)')
+        # f1_phi_output_yz_arr = f1_ampl * np.cos(np.radians(f1 * theta_mid_arr + f1_angle))
 
     # Approximate phi_output_yz
     phi_output_yz_approx_arr = f0_ampl + theta_mid_arr / 2 + f1_phi_output_yz_arr
@@ -458,20 +459,21 @@ def approximate_theta_output_zx_as_function_of_theta_mid(theta_mid_arr,
     # Approximate theta_output_zx using single harmonic approximation
     theta_output_zx_approx_arr = f0_ampl  # positive, because f0_angle = 0
 
-    # . convert f1_theta_output_zx_arr part into expression with only
-    #   sin(theta_mid) or cos(theta_mid)
-    # . identity: cos(t) = sin(t + 90)
+    # . convert f1_theta_output_zx_arr part into expression with sin(theta_mid)
+    #   using identity cos(t - 90) = sin(t)
     f1 = 1
-    if np.round(f1_angle) == 90:
-        print('. Use cos(t + 90) = sin(t + 180) = -sin(t)')
-        f1_theta_output_zx_arr = -f1_ampl * np.sin(np.radians(f1 * theta_mid_arr / 2))
-    elif np.round(f1_angle) == -90:
+    if np.round(f1_angle) == -90:
         print('. Use cos(t - 90) = sin(t)')
         f1_theta_output_zx_arr = f1_ampl * np.sin(np.radians(f1 * theta_mid_arr / 2))
+    elif np.round(f1_angle) == 90:
+        print('. Unexpected f1_angle = %f' % f1_angle)
+        # print('. Use cos(t + 90) = sin(t + 180) = -sin(t)')
+        # f1_theta_output_zx_arr = -f1_ampl * np.sin(np.radians(f1 * theta_mid_arr / 2))
     else:
-        print('. f1_angle = %f)' % f1_angle)
-        print('. Keep cos(t + f1_angle)')
-        f1_theta_output_zx_arr = f1_ampl * np.cos(np.radians(f1 * theta_mid_arr / 2 + f1_angle))
+        print('. Unexpected f1_angle = %f' % f1_angle)
+        # print('. f1_angle = %f)' % f1_angle)
+        # print('. Keep cos(t + f1_angle)')
+        # f1_theta_output_zx_arr = f1_ampl * np.cos(np.radians(f1 * theta_mid_arr / 2 + f1_angle))
     theta_output_zx_approx_arr += f1_theta_output_zx_arr
     return theta_output_zx_approx_arr
 
@@ -493,14 +495,18 @@ def approximate_theta_mid_as_function_of_theta_output_zx(theta_output_zx_arr,
                        1 if x > 0 else
                        -1 for x in theta_output_ac_arr]
 
-    if np.round(f1_angle) == 90:
-        print('. Use cos(t + 90) = -sin(t)')
-        theta_mid_arr = -2 * np.degrees(np.arcsin(f1_fraction_arr))
-    elif np.round(f1_angle) == -90:
+    # . convert theta_mid_arr into expression with arcsin(theta_mid) using
+    #   identity cos(t - 90) = sin(t)
+    if np.round(f1_angle) == -90:
         print('. Use cos(t - 90) = sin(t)')
         theta_mid_arr = 2 * np.degrees(np.arcsin(f1_fraction_arr))
+    elif np.round(f1_angle) == 90:
+        print('. Unexpected f1_angle = %f' % f1_angle)
+        # print('. Use cos(t + 90) = -sin(t)')
+        # theta_mid_arr = -2 * np.degrees(np.arcsin(f1_fraction_arr))
     else:
         print('. Not supported for f1_angle = %f' % f1_angle)
+    # Account for sign of mid_tube_rotation
     if mid_tube_rotation == 'positive':
         return theta_mid_arr
     else:
