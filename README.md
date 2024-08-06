@@ -6,18 +6,18 @@ For a video with animations of the swivel and more information please also check
 The swivel model consists of four identical tube segments, one as input tube, two for the mid tube, and one as output tube. After 3D printing, the two segments for the mid tube are glued together and then bolted to the input segment and to the output segment. The bolts should be so tight that the tubes maintain their position, but can be rotated manually.
 
 ![picture](pictures/swivel_bolt.jpg)
-Figure: 3D printed swivel model
+Figure 1: 3D printed swivel model
 
 ## 2 Swivel model definitions
 The swivel is at the tail of an airplane. The airplane is oriented with up in positive Z direction and right in positive Y direction. For forward flight the airplane flies in negative X direction, and the swivel thrust vector points horizontal in positive X direction.
 
 ![picture](pictures/swivel_0_side_zx_mid.jpg)
-Figure: Straight swivel for forward flight
+Figure 2.1: Straight swivel for forward flight
 
 The alpha_tilt angle beteen the tube segments yields a maximum pointing range of 0 to 4 * alpha_tilt degrees, when the mid tube is rotated by theta_mid = 0 to 180 degrees. For alpha_tilt > 22.5 degrees the swivel output can be pointed slightly forward as well, which makes it possible to use the swivel for pitch control during hovering.
 
 ![picture](pictures/swivel_4_alpha_is_90_output.jpg)
-Figure: Tilted swivel for hover flight
+Figure 2.2: Tilted swivel for hover flight
 
 The swivel is also called 3-bearing swivel nozzle or 3-bearing swivel module (BSM), because it has three bearings: one bearing to rotate the input tube with respect to the fuselage, one bearing to rotate the mid tube with respect to the input tube and one bearing to rotate the output tube with respect to the mid tube.
 
@@ -71,9 +71,9 @@ When the swivel is straight (theta_mid = 0), then the YZ angle of the input tube
 The Figure below shows the swivel model in OpenSCAD. The initial phi_input_yz = 180 for the YZ angle of the long side of the input tube. For positive theta_mid from 0 to +180 the swivel will tilt down and for negative theta_mid from 0 to -180 it will tilt up. Hence for positive theta_mid control the swivel needs to be mounted like shown in the airplane. For negative theta_mid the initial YZ angle of the long side of the input tube would have to be mounted at phi_input_yz = 0, so 180 degrees rotated in the YZ plane compared to the Figure, to have the swivel tilt down.
 
 ![picture](pictures/select_3.1_start.jpg)
-Figure: Swivel model in OpenSCAD
+Figure 3: Swivel model in OpenSCAD
 
-## 4 Operation modes in an airplane
+## 4 Operation in an airplane
 
 The swivel is suitable operation in an airplane for:
 * forward flight,
@@ -105,6 +105,10 @@ For smooth thrust vectoring during forward flight it is necessary to be able con
 * Rotation of the mid tube provides steering in the ZX plane, but only between horizontal and down (not between up, horizontal and down).
 
 The swivel can point to any direction around the X-axis by rotating the mid tube to get the off center XR angle and then abruptly rotating the input tube to get the intended YZ angle. However in a real application the input tube cannot instantaneously reach a new YZ angle. Furthermore rotating the input tube by a full circle to reach all off center pointings would complicate the wiring and construction in a real application. Therefore the swivel is not suitable for thrust vectoring during forward flight.
+
+### 4.6 Control range
+* The mid tube needs to be able to rotate over 180 degrees, to transition the swivel between straight and maximum tilt.
+* The input tube needs to be able to counter rotate over 90 degrees to compensate for the mid tube rotation, plus some more degrees to facilitate some yaw control.
 
 ## 5 Animate swivel movements in OpenSCAD
 The swivel model movements are animated in OpenSCAD. The swivel.scad design in OpenSCAD can:
@@ -148,12 +152,12 @@ The matrix equations that yield the swivel output position, are available as fun
 Rotating the mid tube by theta_mid changes the pointing of the output tube. For horizontal pointing theta_mid = 0 and for maximum output tilt theta_mid = 180 degrees. The function phi_output_yz(theta_mid) shows how the phi_input_yz of input tube needs to be counter rotated to keep the swivel output pointing in the ZX plane during transition:
 
 ![picture](pictures/phi_output_yz_as_function_of_theta_mid.jpg)
-Figure: phi_output_yz(theta_mid)
+Figure 7.1: Exact function phi_output_yz(theta_mid)
 
 The function theta_output_zx(theta_mid) shows how the swivel output pointing depends on the rotation by theta_mid of the mid tube:
 
 ![picture](pictures/theta_output_zx_as_function_of_theta_mid.jpg)
-Figure: theta_output_zx(theta_mid)
+Figure 7.2: Excact function theta_output_zx(theta_mid)
 
 ### 7.2 Harmonic approximation using the DFT
 The exact formula for swivel output control is huge, because it has in the order of hundred terms (see SwivelOutputPosition_Gonio() function in swivel_functions.scad). Therefore it may need to be approximated to be able to implement it in a real time application, using e.g.:
@@ -161,16 +165,24 @@ The exact formula for swivel output control is huge, because it has in the order
 * a precalculated lookup table with values from the exact formula,
 * an approximation formula that is close to the exact formula, but much simpler to calculate.
 
-The function for phi_output_yz(theta_mid) is almost linear, the deviation suggests that adding the first harmonic frequency component deviation yields a good approximation. The function for theta_output_zx(theta_mid) looks like the first halve of a sinus, this suggest that the first harmonic frequency component of concat(theta_output_zx(theta_mid), -theta_output_zx(theta_mid)) yields a good approximation. The harmonic components are obtained using the Discrete Fourier Transform (DFT) for real input signals (rDFT). With analysis and plots from the swivel.ipynb jupyter notebook this results in:
-
+The function for phi_output_yz(theta_mid) in Figure 7.1 almost linear, the deviation suggests that adding the first harmonic frequency component deviation yields a good approximation. The function for theta_output_zx(theta_mid) in Figure 7.2 looks like the first halve of a sinus, this suggest that the first harmonic frequency component of concat(theta_output_zx(theta_mid), -theta_output_zx(theta_mid)) yields a good approximation. The harmonic components are obtained using the Discrete Fourier Transform (DFT) for real input signals (rDFT). With analysis and plots from the swivel.ipynb jupyter notebook this results in:
+```
 * phi_output_yz(theta_mid) ~= phi_output_yz_horizontal + theta_mid / 2 - phi_output_yz_f1_ampl * sin(theta_mid)
 * theta_output_zx(theta_mid) ~= theta_output_zx_horizontal + theta_output_zx_f1_ampl * sin(theta_mid / 2)
 
+  . for 0 <= theta_mid <= 360 degrees, so for all theta_mid,
+  . the f1_ampl follow from the DFT analysis of the exact formulas:
+    . phi_output_yz_f1_ampl is a few degrees that approximates the small deviation from linear
+    . theta_output_zx_f1_ampl ~= 4 * alpha_tilt
+```
 and inverse:
+```
+* theta_mid(theta_output_zx) ~=  2 * arcsin(f1_fraction) when mid_tube_rotation = 'positive' 
+  theta_mid(theta_output_zx) ~= -2 * arcsin(f1_fraction) when mid_tube_rotation = 'negative' 
 
-* theta_mid(theta_output_zx) ~= 2 * arcsin(theta_output_zx - theta_output_zx_horizontal) / theta_output_zx_f1_ampl)
-
-where theta_output_zx_f1_ampl ~= 4 * alpha_tilt is the maximum angle for theta_output_zx (because -1 <= x <= +1 for arcsin(x)).
+   . for abs(f1_fraction) <= 1, because -1 <= x <= +1 for arcsin(x)
+   . with f1_fraction = (theta_output_zx - theta_output_zx_horizontal) / theta_output_zx_f1_ampl
+```
 
 ### 7.3 Real input DFT support in OpenSCAD
 The dft.scad in https://github.com/erkooi/openscad/math implements the real input DFT in OpenSCAD. The implementation uses matrix multiplication and is not optimized like an Fast Fourier Transform (FFT). However with dft.scad it is possible to calculate the harmonic approximation of the swivel control entirely in OpenSCAD.

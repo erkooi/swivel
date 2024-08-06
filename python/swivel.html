@@ -15573,7 +15573,7 @@ approximate_theta_output_zx_as_function_of_theta_mid()
 <pre><code>theta_mid(theta_output_zx) ~=  2 * arcsin(f1_fraction), when mid_tube_rotation is 'positive'
 theta_mid(theta_output_zx) ~= -2 * arcsin(f1_fraction), when mid_tube_rotation is 'negative'
 
-    for: f0_ampl &lt;= theta_output_zx &lt;= f0_ampl + f1_ampl, because -1 &lt;= x &lt;= +1 for arcsin(x)
+    for: abs(f1_fraction) &lt;= 1, because -1 &lt;= x &lt;= +1 for arcsin(x)
     with:
       . f1_fraction = (theta_output_zx - f0_ampl) / f1_ampl</code></pre>
 </li>
