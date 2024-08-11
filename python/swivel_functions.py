@@ -782,6 +782,7 @@ def _verify_phi_output_yz_and_theta_output_zx():
 def _verify_DetermineThetaMidForThetaOutputZx():
     print('>>> Verify DetermineThetaMidForThetaOutputZx():')
     result = True
+    output_tube_pointing = 'down'
     theta_output_zx_resolution = 0.01
     theta_output_zx_lo = ThetaOutputZxHorizontal()
     theta_output_zx_hi = ThetaOutputZxMax(alpha_tilt)
@@ -791,7 +792,8 @@ def _verify_DetermineThetaMidForThetaOutputZx():
     theta_output_zx_arr = np.linspace(theta_output_zx_lo, theta_output_zx_hi, nof_steps)
     print('theta_output_zx_request  theta_output_zx_result  theta_mid')
     for theta_output_zx_request in theta_output_zx_arr:
-        theta_mid = DetermineThetaMidForThetaOutputZx(theta_output_zx_request, theta_output_zx_resolution, alpha_tilt)
+        theta_mid = DetermineThetaMidForThetaOutputZx(theta_output_zx_request, theta_output_zx_resolution,
+                                                      alpha_tilt, output_tube_pointing)
         t_vector = SwivelThrustVector(1, 1, 1, alpha_tilt, 0, theta_mid)
         theta_output_zx_result = ThetaOutputZxHorizontal() + la.fAngleXR(t_vector)
         print('                    %3.0f                 %7.3f    %7.3f' %
