@@ -25,22 +25,50 @@
 import numpy as np
 import linear_algebra as la
 
+################################################################################
+# Swivel constants
+
+# Use theta_mid_arr + c_theta_mid_eps to offset theta_mid = 0 for straight
+# swivel, which leads to NaN YZ angle. It appears that for SwivelThrustVector()
+# c_theta_mid_eps needs to be ~< 1e-7, so la.f_eps = 1e-10 is too small.
+c_theta_mid_eps = 1e-7
+
+# The swivel assembly is constructed with InputTube() long side markers up,
+# so with phi_input_yz = 90. However the zero position for the long side
+# markers is better defined at phi_input_yz = 0. Therefore use
+# c_phi_input_yz_construction to compensate for this construction offset, by
+# subracting it from the input phi_input_yz in SwivelOutputPosition() and
+# SwivelOutputPosition_Gonio().
+c_phi_input_yz_construction = 90
+
 
 ################################################################################
-# Swivel position_vector
+# Swivel position vector
 
-def SwivelOutputPosition(x_input, x_mid, x_output, phi_input_yz, theta_mid, alpha_tilt):
+def SwivelOutputPosition(x_input, x_mid, x_output, alpha_tilt, phi_input_yz, theta_mid):
     """Calculate position vector from origin to swivel output.
 
     Uses matrices."""
     x = np.array([0, 0, 0, 1])
-    return la.Rot_yz(phi_input_yz) @ \
+    return la.Rot_yz(phi_input_yz - c_phi_input_yz_construction) @ \
         la.Trans(x_input, 0, 0) @ la.Rot_zx(alpha_tilt) @ la.Rot_yz(theta_mid) @ la.Rot_zx(-alpha_tilt) @ \
         la.Trans(x_mid, 0, 0) @ la.Rot_zx(-alpha_tilt) @ la.Rot_yz(-theta_mid) @ la.Rot_zx(alpha_tilt) @ \
         la.Trans(x_output, 0, 0) @ x
 
 
-def SwivelOutputPosition_Gonio(x_input, x_mid, x_output, phi_input_yz, theta_mid, alpha_tilt):
+def SwivelOutputPositionsList(x_input, x_mid, x_output, alpha_tilt, phi_input_yz_arr, theta_mid_arr):
+    """Calculate position vectors from origin to swivel outputs.
+
+    . For array of InputTube YZ angles phi_input_yz_arr and corresponding array
+      of MidTube angles theta_mid_arr.
+    """
+    pVectorList = []
+    [pVectorList.append(SwivelOutputPosition(x_input, x_mid, x_output, alpha_tilt, phi_input_yz, theta_mid))
+     for phi_input_yz, theta_mid in zip(phi_input_yz_arr, theta_mid_arr)]
+    return pVectorList
+
+
+def SwivelOutputPosition_Gonio(x_input, x_mid, x_output, alpha_tilt, phi_input_yz, theta_mid):
     """Calculate position vector from origin to swivel output.
 
     Using gonio equations obtained from elaborating the matrices.
@@ -63,7 +91,7 @@ def SwivelOutputPosition_Gonio(x_input, x_mid, x_output, phi_input_yz, theta_mid
     # ca2sa2 = ca2 * sa2
     ct2 = ct * ct
     st2 = st * st
-    phi_input_yz_rad = np.radians(phi_input_yz)
+    phi_input_yz_rad = np.radians(phi_input_yz - c_phi_input_yz_construction)
     cp = np.cos(phi_input_yz_rad)
     sp = np.sin(phi_input_yz_rad)
     Xm = ca2 + sa2 * ct
@@ -81,28 +109,67 @@ def SwivelOutputPosition_Gonio(x_input, x_mid, x_output, phi_input_yz, theta_mid
 ################################################################################
 # Swivel thrust_vector
 
-def SwivelThrustVector(x_input, x_mid, x_output, phi_input_yz, theta_mid, alpha_tilt):
+def SwivelThrustVector(x_input, x_mid, x_output, alpha_tilt, phi_input_yz, theta_mid):
     """Calculate thrust vector of swivel output.
 
-    Uses matrices.
+    . As function of InputTube YZ angle phi_input_yz and MidTube angle
+      theta_mid.
+    . Replace theta_mid == 0 by theta_mid = la.f_eps to avoid arctan() = nan
+      for YZ angle of the thrust vector when the swivel is straight.
+    . Uses matrices.
     """
     return \
-        SwivelOutputPosition(x_input, x_mid, x_output, phi_input_yz, theta_mid, alpha_tilt) - \
-        SwivelOutputPosition(x_input, x_mid, 0, phi_input_yz, theta_mid, alpha_tilt)
+        SwivelOutputPosition(x_input, x_mid, x_output, alpha_tilt, phi_input_yz, theta_mid) - \
+        SwivelOutputPosition(x_input, x_mid, 0, alpha_tilt, phi_input_yz, theta_mid)
 
 
-def SwivelThrustVector_Gonio(x_input, x_mid, x_output, phi_input_yz, theta_mid, alpha_tilt):
+def SwivelThrustVectorsList(x_input, x_mid, x_output, alpha_tilt, phi_input_yz_arr, theta_mid_arr):
+    """Calculate thrust vectors of swivel outputs.
+
+    . For array of InputTube YZ angles phi_input_yz_arr and corresponding array
+      of MidTube angles theta_mid_arr.
+    """
+    tVectorList = []
+    [tVectorList.append(SwivelThrustVector(x_input, x_mid, x_output, alpha_tilt, phi_input_yz, theta_mid))
+     for phi_input_yz, theta_mid in zip(phi_input_yz_arr, theta_mid_arr)]
+    return tVectorList
+
+
+def SwivelThrustVector_Gonio(x_input, x_mid, x_output, alpha_tilt, phi_input_yz, theta_mid):
     """Calculate thrust vector of swivel output.
 
-    Uses gonio equations obtained from elaborating the matrices.
+    . Uses gonio equations obtained from elaborating the matrices.
+    . Equivalent to SwivelThrustVector(), so SwivelThrustVector_Gonio() yields
+      same thrust vector.
     """
     return \
-        SwivelOutputPosition_Gonio(x_input, x_mid, x_output, phi_input_yz, theta_mid, alpha_tilt) - \
-        SwivelOutputPosition_Gonio(x_input, x_mid, 0, phi_input_yz, theta_mid, alpha_tilt)
+        SwivelOutputPosition_Gonio(x_input, x_mid, x_output, alpha_tilt, phi_input_yz, theta_mid) - \
+        SwivelOutputPosition_Gonio(x_input, x_mid, 0, alpha_tilt, phi_input_yz, theta_mid)
 
 
 ################################################################################
 # Swivel angle constants
+
+# Swivel OutputTube YZ angle = 0 when swivel is straight for anaylysis of
+# phi_output_yz(theta_mid) function.
+def PhiInputYzForAnalysis():
+    """InputTube YZ angle to have phi_output_yz_arr[theta_mid = 0] = 0.
+
+    With phi_output_yz = PhiInputYzForAnalysis() the phi_output_yz(theta_mid)
+    curve will about linearly increase from 0 : 180 for theta_mid 0 : 360.
+    Using PhiInputYzForAnalysis() avoids that the phi_output_yz angle wraps
+    around 0 or 360 degrees, so that the curve is suitable for DFT analysis.
+    """
+    return 270  # = 180 + c_phi_input_yz_construction
+
+
+def PhiOutputYzForAnalysis():
+    """Start OutputTube YZ angle to have phi_output_yz_arr[theta_mid = 0] = 0.
+
+    With phi_input_yz == PhiInputYzForAnalysis() then phi_output_yz(0) = 0.
+    """
+    return 0
+
 
 # Swivel phi_input_yz control angle from y to z in YZ plane
 def PhiInputYzForInputMarkerUp():
@@ -110,35 +177,37 @@ def PhiInputYzForInputMarkerUp():
     return 90
 
 
+def InitPhiInputYzHorizontal(mid_tube_rotation):
+    """Initial InputTube YZ angle for horizontal, straight swivel, when
+    theta_mid = 0.
+
+    InitPhiInputYzHorizontal() prepares phi_input_yz of horizontal, straight
+    swivel, at theta_mid = 0, such that including compensating for the counter
+    rotation the swivel phi_output_yz will reach PhiOutputYzVertical() for
+    vertical, maximum tilted swivel. The phi_input_yz is then
+    PhiInputYzVertical(). The InitPhiInputYzHorizontal() can be found by
+    starting with a maximum tilted swivel and then rotating the MidTube to
+    theta_mid = 0 and meanwhile compensating the InputTube YZ angle to keep
+    the swivel output in the vertical ZX plane.
+    """
+    if mid_tube_rotation == 'positive':
+        return 180
+    else:
+        return 0
+
+
 def PhiInputYzVertical(output_tube_pointing):
-    """phi_input_yz angle in YZ plane for InputTube when swivel points down
-    or up with maximum tilt (theta_mid = 180).
+    """InputTube YZ angle for vertical, maximum tilted swivel, when theta_mid
+    = 180.
     """
     phi_output_yz_vertical = PhiOutputYzVertical(output_tube_pointing)
     return la.toAngle360(phi_output_yz_vertical + 180)
 
 
-def InitPhiInputYzHorizontal(output_tube_pointing, mid_tube_rotation):
-    """Initial phi_input_yz angle in YZ plane when theta_mid = 0 for
-    horizontal swivel and set up for pointing down or up, when theta_mid
-    direction of mid_tube_rotation is positive or negative.
-    """
-    if output_tube_pointing == 'down':
-        if mid_tube_rotation == 'positive':
-            return 180  # down, positive
-        else:
-            return 0    # down, negative
-    else:
-        if mid_tube_rotation == 'positive':
-            return 0    # up, positive
-        else:
-            return 180  # up, negative
-
-
 # Swivel thrust angle phi_output_yz from y to z in YZ plane
 def PhiOutputYzVertical(output_tube_pointing):
-    """phi_output_yz angle in YZ plane when swivel thrust output direction is
-    down or up at theta_mid = 180.
+    """OutputTube YZ angle for vertical, maximum tilted swivel, when theta_mid
+    = 180.
     """
     if output_tube_pointing == "down":
         return 270  # = -90
@@ -146,26 +215,37 @@ def PhiOutputYzVertical(output_tube_pointing):
         return 90  # up = down - 180
 
 
-def InitPhiOutputYzHorizontal(output_tube_pointing, mid_tube_rotation):
-    """Initial phi_output_yz angle in YZ plane when theta_mid = 0, so
-    horizontal, straight swivel.
+def InitPhiOutputYzHorizontal(mid_tube_rotation):
+    """Initial OutputTube YZ angle for horizontal, straight swivel, when
+    theta_mid = 0.
 
-    The swivel can be set up for pointing down or up, and the mid_tube_rotation
-    for theta_mid can be positive or negative. The initial phi_output_yz at
-    theta_mid = 0 is defined such that, without compensating for YZ rotation
-    due to theta_mid != 0, the swivel will reach PhiOutputYzVertical() at
-    theta_mid = 180.
-
-    The phi_output_yz value at theta_mid = 0 may be calculated using theta_mid
-    = 0.01, so almost 0:
-
-    . t_vector = SwivelThrustVector(1, 1, 1, phi_input_yz_horizontal,
-                                    theta_mid, alpha_tilt)
-    . phi_output_yz = la.toAngle360(la.fAngleYZ(t_vector))
-    . return np.round(phi_output_yz)
+    InitPhiOutputYzHorizontal() = InitPhiInputYzHorizontal(). This can be seen
+    when OutputTube is not rotated and kept tilted with the MidTube.
     """
-    phi_input_yz_horizontal = InitPhiInputYzHorizontal(output_tube_pointing, mid_tube_rotation)
-    return la.toAngle360(phi_input_yz_horizontal + 180)
+    return InitPhiInputYzHorizontal(mid_tube_rotation)
+
+
+def PhiOutputYzCrosstalkOffset(output_tube_pointing, mid_tube_rotation):
+    """OutputTube YZ rotation when theta_mid is rotated from 0 to 180.
+
+    The counter rotation of InputTube YZ angle makes sure that the swivel
+    OutputTube YZ angle remains constant to keep in the vertical ZX plane.
+    The required counter rotation of the InputTube YZ angle is the opposite of
+    the crosstalk offset that is caused by theta_mid on the OutputTube YZ
+    angle when theta_mid = 180.
+    """
+    # if output_tube_pointing == "down":
+    #     if mid_tube_rotation == "positive":
+    #         return 90
+    #     else:
+    #         return 270
+    # else:
+    #     if mid_tube_rotation == "positive":
+    #         return 270
+    #     else:
+    #         return 90
+    return la.toAngle360(InitPhiInputYzHorizontal(mid_tube_rotation) -
+                         PhiInputYzVertical(output_tube_pointing))
 
 
 # Swivel theta_output_zx thrust angle from z to x
@@ -201,40 +281,69 @@ def ThetaOutputZxVertical(output_tube_pointing):
 ################################################################################
 # Swivel control
 
-def DetermineThetaMidForThetaOutputZx(theta_output_zx_request, theta_output_zx_resolution, alpha_tilt):
+def DetermineThetaMidForThetaOutputZx(theta_output_zx_request, theta_output_zx_resolution,
+                                      alpha_tilt, output_tube_pointing):
     """Calculate theta_mid that yields requested theta_output_zx.
 
     Uses binary search and fAngleXR(SwivelThrustVector()) to find theta_mid,
-    because exact inverse function to calculate theta_mid as function of
+    because the exact inverse function to calculate theta_mid as function of
     theta_output_zx is not available.
     """
-    if theta_output_zx_request < ThetaOutputZxHorizontal() - la.f_eps:
-        print('Too small theta_output_zx_request')
-        theta_mid = 0
-    elif theta_output_zx_request < ThetaOutputZxHorizontal() + la.f_eps:
-        theta_mid = 0
-    elif theta_output_zx_request > ThetaOutputZxMax(alpha_tilt) + la.f_eps:
-        print('Too large theta_output_zx_request')
-        theta_mid = 180
-    elif theta_output_zx_request > ThetaOutputZxMax(alpha_tilt) - la.f_eps:
-        theta_mid = 180
+    zx_horizontal = ThetaOutputZxHorizontal()
+    # Account for output_tube_pointing on theta_output_zx range
+    if output_tube_pointing == 'down':
+        zx_max = ThetaOutputZxMax(alpha_tilt)
+        zx_min = zx_horizontal
+        theta_mid_zx_max = 180
+        theta_mid_zx_min = 0
     else:
-        phi_input_yz = 0
+        zx_max = zx_horizontal
+        zx_min = ThetaOutputZxMin(alpha_tilt)
+        theta_mid_zx_max = 0
+        theta_mid_zx_min = 180
+
+    # Fixed theta_mid at zx_min and zx_max ends of theta_output_zx range
+    if np.isclose(theta_output_zx_request, zx_horizontal, atol=la.f_eps):
+        theta_mid = 0
+    elif np.isclose(theta_output_zx_request, zx_max, atol=la.f_eps):
+        theta_mid = theta_mid_zx_max
+    elif np.isclose(theta_output_zx_request, zx_min, atol=la.f_eps):
+        theta_mid = theta_mid_zx_min
+    elif theta_output_zx_request > zx_max:
+        print('Too large theta_output_zx_request')
+        theta_mid = theta_mid_zx_max
+    elif theta_output_zx_request < zx_min:
+        print('Too small theta_output_zx_request')
+        theta_mid = theta_mid_zx_max
+    else:
+
+        # Binary search theta_mid
         theta_mid_lo = 0
         theta_mid_hi = 180
-        # Binary search
         n = 0
         n_max = np.ceil(np.log2((theta_mid_hi - theta_mid_lo) / theta_output_zx_resolution))
         while n < n_max:
             theta_mid = (theta_mid_lo + theta_mid_hi) / 2
-            t_vector = SwivelThrustVector(1, 1, 1, phi_input_yz, theta_mid, alpha_tilt)
-            theta_output_zx = ThetaOutputZxHorizontal() + la.fAngleXR(t_vector)
-            if theta_output_zx > theta_output_zx_request + theta_output_zx_resolution:
-                theta_mid_hi = theta_mid
-            elif theta_output_zx < theta_output_zx_request - theta_output_zx_resolution:
-                theta_mid_lo = theta_mid
+            # Determine theta_output_zx using OutputTube XR angle, so
+            # independent of phi_input_yz, to avoid having to account for
+            # the phi_output(theta_mid) crosstalk. Use phi_input_yz = 0.
+            t_vector = SwivelThrustVector(1, 1, 1, alpha_tilt, 0, theta_mid)
+            if output_tube_pointing == 'down':
+                theta_output_zx = ThetaOutputZxHorizontal() + la.fAngleXR(t_vector)
+                if theta_output_zx > theta_output_zx_request + theta_output_zx_resolution:
+                    theta_mid_hi = theta_mid
+                elif theta_output_zx < theta_output_zx_request - theta_output_zx_resolution:
+                    theta_mid_lo = theta_mid
+                else:
+                    break
             else:
-                break
+                theta_output_zx = ThetaOutputZxHorizontal() - la.fAngleXR(t_vector)
+                if theta_output_zx > theta_output_zx_request + theta_output_zx_resolution:
+                    theta_mid_lo = theta_mid
+                elif theta_output_zx < theta_output_zx_request - theta_output_zx_resolution:
+                    theta_mid_hi = theta_mid
+                else:
+                    break
             n = n + 1
     return theta_mid
 
@@ -242,10 +351,7 @@ def DetermineThetaMidForThetaOutputZx(theta_output_zx_request, theta_output_zx_r
 ################################################################################
 # Swivel harmonic approximation for phi_output_yz(theta_mid)
 
-def rfft_bins_of_phi_output_yz_as_function_of_theta_mid(alpha_tilt,
-                                                        output_tube_pointing,
-                                                        mid_tube_rotation,
-                                                        N=16):
+def rfft_bins_of_phi_output_yz_as_function_of_theta_mid(alpha_tilt, N=16):
     """Calculate DC and first harmonic using real input rDFT of sinus like
     part in exact phi_output_yz(theta_mid).
 
@@ -256,19 +362,17 @@ def rfft_bins_of_phi_output_yz_as_function_of_theta_mid(alpha_tilt,
          theta_mid_arr is over range [0 : 360> degrees. The maximum number
          of frequency bins is K = N // 2 + 1.
          It is not necessary to choose large N >> 16 for more accuracy.
-
     Return:
     . rfft_phi_output_yz_diff_bin_arr: rFFT bin polar values for
       phi_output_yz(theta_mid).
     """
     print('rfft_bins_of_phi_output_yz_as_function_of_theta_mid()')
+    phi_input_yz_for_analysis = PhiInputYzForAnalysis()
+    phi_output_yz_for_analysis = PhiOutputYzForAnalysis()
+    print('. phi_input_yz_for_analysis = ', phi_input_yz_for_analysis)
+    print('. phi_output_yz_for_analysis = ', phi_output_yz_for_analysis)
 
-    phi_input_yz_horizontal = InitPhiInputYzHorizontal(output_tube_pointing, mid_tube_rotation)
-    phi_output_yz_horizontal = InitPhiOutputYzHorizontal(output_tube_pointing, mid_tube_rotation)
-    print('. phi_input_yz_horizontal = ', phi_input_yz_horizontal)
-    print('. phi_output_yz_horizontal = ', phi_output_yz_horizontal)
-
-    # Prepare theta_mid_arr
+    # Prepare theta_mid_arr, 0 <= theta_mid < 360 degrees
     N_degrees = 360
     theta_mid_arr = np.linspace(0, N_degrees, N, endpoint=False)
 
@@ -277,16 +381,17 @@ def rfft_bins_of_phi_output_yz_as_function_of_theta_mid(alpha_tilt,
     #   vector pointing direction is independent of swivel tube lengths.
     phi_output_yz_arr = np.zeros(N)
     for T in range(N):
-        t_vector = SwivelThrustVector(1, 1, 1, phi_input_yz_horizontal, theta_mid_arr[T], alpha_tilt)
+        t_vector = SwivelThrustVector(1, 1, 1, alpha_tilt, phi_input_yz_for_analysis, theta_mid_arr[T])
         phi_output_yz_arr[T] = la.toAngle360(la.fAngleYZ(t_vector))
 
     # . replace phi_output_yz_arr[theta_mid = 0] = NaN, when OutputTube is
     #   horizontal at x-axis (so z/y = 0/0)
-    phi_output_yz_arr[0] = phi_output_yz_horizontal
+    phi_output_yz_arr[0] = phi_output_yz_for_analysis
 
-    # Determine deviation of phi_output_yz from linear phi_output_yz_horizontal
-    # + theta_mid / 2. Keep DC level of  phi_output_yz_horizontal in
-    # phi_output_yz_diff_arr, because that then will appear in the DC bin 0.
+    # Determine deviation of phi_output_yz from linear
+    # phi_output_yz_for_analysis + theta_mid / 2. Keep DC level of
+    # phi_output_yz_for_analysis in phi_output_yz_diff_arr, because that then
+    # will appear in the DC bin 0.
     phi_output_yz_diff_arr = phi_output_yz_arr - theta_mid_arr / 2
 
     # Determine harmonics in phi_output_yz_diff_arr using rFFT
@@ -301,23 +406,31 @@ def rfft_bins_of_phi_output_yz_as_function_of_theta_mid(alpha_tilt,
                                        angle_rfft_phi_output_yz_diff_arr)
 
     # Single harmonic approximation for phi_output_yz as function of theta_mid
+    # . log f0 DC and f1 harmonic
     f0 = 0
-    f0_ampl = ampl_rfft_phi_output_yz_diff_arr[f0]  # = DC = InitPhiOutputYzHorizontal()
+    f0_ampl = ampl_rfft_phi_output_yz_diff_arr[f0]  # = DC = PhiOutputYzForAnalysis()
     f0_angle = angle_rfft_phi_output_yz_diff_arr[f0]
     f1 = 1
     f1_ampl = ampl_rfft_phi_output_yz_diff_arr[f1]
     f1_angle = angle_rfft_phi_output_yz_diff_arr[f1]
-    print('. f0 = %d : f0_ampl = %.10f, f0_angle = %6.1f, = DC = InitPhiOutputYzHorizontal()' %
+    print('. f0 = %d : f0_ampl = %.10f, f0_angle = %.10f, = DC = PhiOutputYzForAnalysis()' %
           (f0, f0_ampl, f0_angle))
-    print('. f1 = %d : f1_ampl = %.10f, f1_angle = %6.1f' % (f1, f1_ampl, f1_angle))
-
+    print('. f1 = %d : f1_ampl = %.10f, f1_angle = %.10f' % (f1, f1_ampl, f1_angle))
+    # . verify expected f0_ampl == 0
+    if not np.isclose(f0_ampl, 0):
+        print('. Unexpected f0_ampl = %f' % f1_angle)
+        return None
+    # . verify expected f1_angle == 90
+    if np.isclose(f1_angle, 90):
+        print('. Use cos(t + f1_angle) = cos(t + 90) = -sin(t)')
+    else:
+        print('. Unexpected f1_angle = %f' % f1_angle)
+        return None
     # Return polar bin values
     return rfft_phi_output_yz_diff_bin_arr
 
 
-def approximate_phi_output_yz_as_function_of_theta_mid(theta_mid_arr,
-                                                       f0_ampl,
-                                                       f1_ampl, f1_angle):
+def approximate_phi_output_yz_as_function_of_theta_mid(theta_mid_arr, f1_ampl):
     """Approximate phi_output_yz(theta_mid) using first harmonic from DFT
 
     See swivel.ipynb for more description and plots.
@@ -325,39 +438,22 @@ def approximate_phi_output_yz_as_function_of_theta_mid(theta_mid_arr,
     Input:
     . theta_mid_arr: Range of theta_mid angles to evaluate for
          phi_output_yz_approx_arr
-    . f0_ampl: is the DC part = InitPhiOutputYzHorizontal(), in
-        phi_output_yz_approx_arr. Positive in range 0 - 360, so no need to
-        pass on f0_angle.
-    . f1_ampl, f1_angle: first harmonic from rDFT of harmonic part in exact
+    . f1_ampl: first harmonic from rDFT of harmonic part in exact
         phi_output_yz(theta_mid). Few degrees for the small sinus like
         deviation from linear.
-
     Return:
     . phi_output_yz_approx_arr: approximate phi_output_yz(theta_mid). This
         needs to be compensated via phi_input_yz to keep swivel motion in ZX
         plane.
     """
     print('approximate_phi_output_yz_as_function_of_theta_mid():')
-    print('. f0_ampl = %.3f, f1_ampl = %.3f, f1_angle = %.1f)' % (f0_ampl, f1_ampl, f1_angle))
+    print('. f1_ampl = %.3f' % f1_ampl)
 
     # Approximate phi_output_yz using single harmonic approximation
-    # . convert f1_phi_output_yz_arr part into expression with sin(theta_mid)
-    #   using identity: cos(t) = sin(t + 90).
+    # . Use cos(t + f1_angle) = cos(t + 90) = -sin(t)
     f1 = 1
-    if np.round(f1_angle) == 90:
-        print('. Use cos(t + 90) = sin(t + 180) = -sin(t)')
-        f1_phi_output_yz_arr = -f1_ampl * np.sin(np.radians(f1 * theta_mid_arr))
-    elif np.round(f1_angle) == -90:
-        print('. Unexpected f1_angle = %f' % f1_angle)
-        # print('. Use cos(t - 90) = sin(t)')
-        # f1_phi_output_yz_arr = f1_ampl * np.sin(np.radians(f1 * theta_mid_arr))
-    else:
-        print('. Unexpected f1_angle = %f' % f1_angle)
-        # print('. Keep cos(t + f1_angle)')
-        # f1_phi_output_yz_arr = f1_ampl * np.cos(np.radians(f1 * theta_mid_arr + f1_angle))
-
-    # Approximate phi_output_yz
-    phi_output_yz_approx_arr = f0_ampl + theta_mid_arr / 2 + f1_phi_output_yz_arr
+    f1_phi_output_yz_arr = -f1_ampl * np.sin(np.radians(f1 * theta_mid_arr))
+    phi_output_yz_approx_arr = theta_mid_arr / 2 + f1_phi_output_yz_arr
     return phi_output_yz_approx_arr
 
 
@@ -365,7 +461,6 @@ def approximate_phi_output_yz_as_function_of_theta_mid(theta_mid_arr,
 # Swivel harmonic approximation for theta_output_zx(theta_mid)
 
 def rfft_bins_of_theta_output_zx_as_function_of_theta_mid(alpha_tilt,
-                                                          output_tube_pointing,
                                                           mid_tube_rotation,
                                                           N=16):
     """Calculate DC and first harmonic using real input rDFT of sinus like
@@ -378,19 +473,19 @@ def rfft_bins_of_theta_output_zx_as_function_of_theta_mid(alpha_tilt,
          theta_mid_arr is over range [0 : 360> degrees. The maximum number
          of frequency bins is K = N // 2 + 1.
          It is not necessary to choose large N >> 16 for more accuracy.
-
     Return:
     . rfft_theta_output_zx_bin_arr2: rFFT bin polar values for
       theta_output_zx(theta_mid).
     """
     print('rfft_bins_of_theta_output_zx_as_function_of_theta_mid()')
+    print('. mid_tube_rotation = ', mid_tube_rotation)
 
-    phi_input_yz_horizontal = InitPhiInputYzHorizontal(output_tube_pointing, mid_tube_rotation)
+    phi_input_yz_horizontal = InitPhiInputYzHorizontal(mid_tube_rotation)
     theta_output_zx_horizontal = ThetaOutputZxHorizontal()
     print('. phi_input_yz_horizontal = ', phi_input_yz_horizontal)
     print('. theta_output_zx_horizontal = ', theta_output_zx_horizontal)
 
-    # Prepare theta_mid_arr
+    # Prepare theta_mid_arr, 0 <= theta_mid < 360 degrees
     N_degrees = 360
     theta_mid_arr = np.linspace(0, N_degrees, N, endpoint=False)
 
@@ -399,7 +494,7 @@ def rfft_bins_of_theta_output_zx_as_function_of_theta_mid(alpha_tilt,
     #   vector pointing direction is independent of swivel tube lengths.
     theta_output_zx_arr = np.zeros(N)
     for T in range(N):
-        t_vector = SwivelThrustVector(1, 1, 1, phi_input_yz_horizontal, theta_mid_arr[T], alpha_tilt)
+        t_vector = SwivelThrustVector(1, 1, 1, alpha_tilt, phi_input_yz_horizontal, theta_mid_arr[T])
         theta_output_zx_arr[T] = theta_output_zx_horizontal + la.toAngle360(la.fAngleXR(t_vector))
 
     # Create sinus like signal from theta_output_arr and negated copy
@@ -418,7 +513,8 @@ def rfft_bins_of_theta_output_zx_as_function_of_theta_mid(alpha_tilt,
     rfft_theta_output_zx_bin_arr2 = (rfft_theta_output_zx_ampl_arr2,
                                      rfft_theta_output_zx_angle_arr2)
 
-    # Log harmonic bin values for theta_output_zx(theta_mid)
+    # Single harmonic approximation for theta_output_zx as function of theta_mid
+    # . log f0 DC and f1 harmonic
     f0 = 0  # DC
     f0_ampl = rfft_theta_output_zx_ampl_arr2[f0]  # = DC = = ThetaOutputZxHorizontal()
     f0_angle = rfft_theta_output_zx_angle_arr2[f0]
@@ -429,6 +525,21 @@ def rfft_bins_of_theta_output_zx_as_function_of_theta_mid(alpha_tilt,
           (f0, f0_ampl, f0_angle))
     print('. f1 = %2d : f1_ampl = %.10f, f1_angle = %6.1f, ~= SwivelTiltMax()' %
           (f1, f1_ampl, f1_angle))
+
+    # . verify expected f0_angle == 0 or 180 for sign +1 or -1
+    if np.isclose(np.cos(f0_angle), 1):
+        print('. Use +1 * f0_ampl')
+    elif np.isclose(np.cos(f0_angle), -1):
+        print('. Use -1 * f0_ampl')
+    else:
+        print('. Unexpected f0_angle = %f' % f0_angle)
+        return None
+    # . verify expected f1_angle == -90
+    if np.isclose(f1_angle, -90):
+        print('. Use cos(t + f1_angle) = cos(t - 90) = sin(t)')
+    else:
+        print('. Unexpected f1_angle = %f' % f1_angle)
+        return None
 
     # Return polar bin values
     return rfft_theta_output_zx_bin_arr2
@@ -445,36 +556,21 @@ def approximate_theta_output_zx_as_function_of_theta_mid(theta_mid_arr,
     Input:
     . theta_mid_arr: Range of theta_mid angles to evaluate for
          theta_output_zx_approx_arr
-    . f0_ampl,
-      f1_ampl, f1_angle: DC and first harmonics from rDFT of exact
-        theta_output_zx(theta_mid). DC = +f0_ampl, because f0_angle = 0, so
+    . f0_ampl: DC from rDFT of exact. DC = +f0_ampl, because f0_angle = 0, so
         cos(f0_angle) = +1, and no need to pass f0_angle on.
-
+      f1_ampl, f1_angle: first harmonics from rDFT of exact
+        theta_output_zx(theta_mid).
     Return:
     . theta_output_zx_approx_arr: approximate theta_output_zx(theta_mid)
     """
     print('approximate_theta_output_zx_as_function_of_theta_mid()')
-    print('. f0_ampl = %.3f, f1_ampl = %.3f, f1_angle = %.1f)' % (f0_ampl, f1_ampl, f1_angle))
+    print('. f0_ampl = %.3f, f1_ampl = %.3f, f1_angle = %.1f' % (f0_ampl, f1_ampl, f1_angle))
 
     # Approximate theta_output_zx using single harmonic approximation
-    theta_output_zx_approx_arr = f0_ampl  # positive, because f0_angle = 0
-
-    # . convert f1_theta_output_zx_arr part into expression with sin(theta_mid)
-    #   using identity cos(t - 90) = sin(t)
+    # . Use cos(t + f1_angle) = cos(t - 90) = sin(t)
     f1 = 1
-    if np.round(f1_angle) == -90:
-        print('. Use cos(t - 90) = sin(t)')
-        f1_theta_output_zx_arr = f1_ampl * np.sin(np.radians(f1 * theta_mid_arr / 2))
-    elif np.round(f1_angle) == 90:
-        print('. Unexpected f1_angle = %f' % f1_angle)
-        # print('. Use cos(t + 90) = sin(t + 180) = -sin(t)')
-        # f1_theta_output_zx_arr = -f1_ampl * np.sin(np.radians(f1 * theta_mid_arr / 2))
-    else:
-        print('. Unexpected f1_angle = %f' % f1_angle)
-        # print('. f1_angle = %f)' % f1_angle)
-        # print('. Keep cos(t + f1_angle)')
-        # f1_theta_output_zx_arr = f1_ampl * np.cos(np.radians(f1 * theta_mid_arr / 2 + f1_angle))
-    theta_output_zx_approx_arr += f1_theta_output_zx_arr
+    f1_theta_output_zx_arr = f1_ampl * np.sin(np.radians(f1 * theta_mid_arr / 2))
+    theta_output_zx_approx_arr = f0_ampl + f1_theta_output_zx_arr
     return theta_output_zx_approx_arr
 
 
@@ -483,34 +579,38 @@ def approximate_theta_mid_as_function_of_theta_output_zx(theta_output_zx_arr,
                                                          f0_ampl,
                                                          f1_ampl, f1_angle,
                                                          mid_tube_rotation):
-    print('approximate_theta_mid_as_function_of_theta_output_zx()')
-    print('. mid_tube_rotation = %s' % mid_tube_rotation)
-    print('. f0_ampl = %.3f, f1_ampl = %.3f, f1_angle = %.1f)' % (f0_ampl, f1_ampl, f1_angle))
+    """Approximate theta_mid(theta_output_zx) using first harmonic from real
+    input DFT.
 
-    # y = arcsin(x) for -1 <= x <= 1, -90 <= y <= 90, therefore the maximum
-    # theta_output_ac = f1_ampl for this approximation, and f1_ampl ~=
-    # SwivelTiltMax(alpha_tilt).
+    Input:
+    . f0_ampl = DC = ThetaOutputZxHorizontal()
+    . f1_ampl ~= SwivelTiltMax(alpha_tilt)
+    Return:
+    . theta_mid_approx_arr: approximate theta_mid(theta_output_zx)
+    """
+    print('approximate_theta_mid_as_function_of_theta_output_zx()')
+    print('. f0_ampl = %.3f, f1_ampl = %.3f, f1_angle = %.1f' % (f0_ampl, f1_ampl, f1_angle))
+    print('. mid_tube_rotation = %s' % mid_tube_rotation)
+
+    # Approximate theta_mid using single harmonic approximation
+    # . Use cos(t + f1_angle) = cos(t - 90) = sin(t)
+    # . y = arcsin(x) for -1 <= x <= 1, -90 <= y <= 90, therefore the maximum
+    #   theta_output_ac = f1_ampl for this approximation, and f1_ampl ~=
+    #   SwivelTiltMax(alpha_tilt).
+    # . Offset theta_mid = 0 by c_theta_mid_eps to avoid NaN for YZ angle of
+    #   straight swivel.
     theta_output_ac_arr = theta_output_zx_arr - f0_ampl
-    f1_fraction_arr = [x / f1_ampl if np.abs(x) < f1_ampl else
+    f1_fraction_arr = [c_theta_mid_eps if np.isclose(x, 0, atol=c_theta_mid_eps) else
+                       x / f1_ampl if np.abs(x) < f1_ampl else
                        1 if x > 0 else
                        -1 for x in theta_output_ac_arr]
+    theta_mid_approx_arr = 2 * np.degrees(np.arcsin(f1_fraction_arr))
 
-    # . convert theta_mid_arr into expression with arcsin(theta_mid) using
-    #   identity cos(t - 90) = sin(t)
-    if np.round(f1_angle) == -90:
-        print('. Use cos(t - 90) = sin(t)')
-        theta_mid_arr = 2 * np.degrees(np.arcsin(f1_fraction_arr))
-    elif np.round(f1_angle) == 90:
-        print('. Unexpected f1_angle = %f' % f1_angle)
-        # print('. Use cos(t + 90) = -sin(t)')
-        # theta_mid_arr = -2 * np.degrees(np.arcsin(f1_fraction_arr))
-    else:
-        print('. Not supported for f1_angle = %f' % f1_angle)
     # Account for sign of mid_tube_rotation
     if mid_tube_rotation == 'positive':
-        return theta_mid_arr
+        return theta_mid_approx_arr
     else:
-        return theta_mid_arr * -1
+        return theta_mid_approx_arr * -1
 
 
 ################################################################################
@@ -519,7 +619,7 @@ def approximate_theta_mid_as_function_of_theta_output_zx(theta_output_zx_arr,
 def _verify_position_vector():
     # . echo
     print('>>> Verify position vector:')
-    p_vector = SwivelOutputPosition_Gonio(x_input, x_mid, x_output, phi_input_yz_gold, theta_mid_gold, alpha_tilt_gold)
+    p_vector = SwivelOutputPosition_Gonio(x_input, x_mid, x_output, alpha_tilt_gold, phi_input_yz_gold, theta_mid_gold)
     print('p_vector[0] = ', p_vector[0])
     print('p_vector[1] = ', p_vector[1])
     print('p_vector[2] = ', p_vector[2])
@@ -554,9 +654,9 @@ def _verify_position_vector():
 
 def _verify_thrust_vector():
     # . echo
-    print('>>> Verify position vector:')
-    t_vector = SwivelThrustVector_Gonio(x_input, x_mid, x_output,
-                                        phi_input_yz_gold, theta_mid_gold, alpha_tilt_gold)
+    print('>>> Verify thrust vector:')
+    t_vector = SwivelThrustVector_Gonio(x_input, x_mid, x_output, alpha_tilt_gold,
+                                        phi_input_yz_gold, theta_mid_gold)
     print('t_vector[0] = ', t_vector[0])
     print('t_vector[1] = ', t_vector[1])
     print('t_vector[2] = ', t_vector[2])
@@ -595,10 +695,10 @@ def _verify_SwivelOutputPosition_Gonio_equals_SwivelOutputPosition():
     step = 30
     for theta_mid in range(0, 360, step):
         for phi_input_yz in range(0, 360, step):
-            position_vector = SwivelOutputPosition(x_input, x_mid, x_output,
-                                                   phi_input_yz, theta_mid, alpha_tilt)
-            position_vector_gonio = SwivelOutputPosition_Gonio(x_input, x_mid, x_output,
-                                                               phi_input_yz, theta_mid, alpha_tilt)
+            position_vector = SwivelOutputPosition(x_input, x_mid, x_output, alpha_tilt,
+                                                   phi_input_yz, theta_mid)
+            position_vector_gonio = SwivelOutputPosition_Gonio(x_input, x_mid, x_output, alpha_tilt,
+                                                               phi_input_yz, theta_mid)
             if np.abs(position_vector[0] - position_vector_gonio[0]) > la.f_eps:
                 print('position vector x:', position_vector[0], '!=', position_vector_gonio[0])
                 result = False
@@ -619,8 +719,8 @@ def _verify_phi_output_yz_and_theta_output_zx():
     # . Use arbitrary phi_input_yz and theta_mid
     phi_input_yz = 15  # = 0 for swivel movement in ZX plane
     theta_mid = 35
-    p_vector = SwivelOutputPosition(1, 1, 1, phi_input_yz, theta_mid, alpha_tilt)
-    t_vector = SwivelThrustVector(1, 1, 1, phi_input_yz, theta_mid, alpha_tilt)
+    p_vector = SwivelOutputPosition(1, 1, 1, alpha_tilt, phi_input_yz, theta_mid)
+    t_vector = SwivelThrustVector(1, 1, 1, alpha_tilt, phi_input_yz, theta_mid)
 
     # . Determine phi_output_yz of the position vector and thrust vector
     #   The position vector and thrust vector should have same angle YZ around
@@ -645,7 +745,7 @@ def _verify_phi_output_yz_and_theta_output_zx():
     #   . t_zx_phi_output_yz == PhiOutputYzVertical('down'),
     #   . t_zx_theta_output_zx == t_theta_output_xr.
     t_zx_phi_input_yz = PhiOutputYzVertical('down') + phi_input_yz - t_phi_output_yz
-    t_zx_vector = SwivelThrustVector(1, 1, 1, t_zx_phi_input_yz, theta_mid, alpha_tilt)
+    t_zx_vector = SwivelThrustVector(1, 1, 1, alpha_tilt, t_zx_phi_input_yz, theta_mid)
     t_zx_phi_output_yz = la.toAngle360(la.fAngleYZ(t_zx_vector))
     t_zx_theta_output_zx = la.fAngleZX(t_zx_vector)
 
@@ -692,7 +792,7 @@ def _verify_DetermineThetaMidForThetaOutputZx():
     print('theta_output_zx_request  theta_output_zx_result  theta_mid')
     for theta_output_zx_request in theta_output_zx_arr:
         theta_mid = DetermineThetaMidForThetaOutputZx(theta_output_zx_request, theta_output_zx_resolution, alpha_tilt)
-        t_vector = SwivelThrustVector(1, 1, 1, 0, theta_mid, alpha_tilt)
+        t_vector = SwivelThrustVector(1, 1, 1, alpha_tilt, 0, theta_mid)
         theta_output_zx_result = ThetaOutputZxHorizontal() + la.fAngleXR(t_vector)
         print('                    %3.0f                 %7.3f    %7.3f' %
               (theta_output_zx_request, theta_output_zx_result, theta_mid))
@@ -713,7 +813,7 @@ if __name__ == '__main__':
     # . Fixed values
     alpha_tilt_gold = 25
     theta_mid_gold = 60     # Swivel off center angle [degrees]
-    phi_input_yz_gold = 0
+    phi_input_yz_gold = c_phi_input_yz_construction
 
     x_input = 50       # Length of input segment
     x_mid = 80         # Length of middle segment
