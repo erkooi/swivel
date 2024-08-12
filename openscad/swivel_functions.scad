@@ -15,6 +15,7 @@
 //------------------------------------------------------------------------------
 //
 // Author: E. Kooistra, March 2022
+//                      July 2024 updated
 // Purpose: Library to calculate the orientation of the swivel
 // Description:
 //  . position vector of OutputTube in FormSwivel (in swivel_assembly.scad)
@@ -28,17 +29,10 @@
 
 
 include <math_constants.scad>;
+include <swivel_constants.scad>;
 use <numscad.scad>;
 use <linear_algebra.scad>;
 use <dft.scad>;
-
-// The swivel assembly is constructed with InputTube() long side markers up,
-// so with phi_input_yz = 90. However the zero position for the long side 
-// markers is better defined at phi_input_yz = 0. Therefore use
-// c_phi_input_yz_construction to compensate for this construction offset, by
-// subracting it from the input phi_input_yz in SwivelOutputPosition() and
-// SwivelOutputPosition_Gonio().
-include <swivel_constants.scad>;
 
 
 //------------------------------------------------------------------------------
@@ -86,9 +80,14 @@ include <swivel_constants.scad>;
 //     . when markers on long sides of the tubes all line up
 //     . pointing down to -z when phi_input_yz = 90 = PhiInputYzVertical("down")
 //     . pointing up to +z when phi_input_yz = -90 = PhiInputYzVertical("up")
-//   . positive theta_mid:
-//     . MidTube() rotates counter clockwise in tilted alpha plane with respect
-//       to the InputTube() and clockwise with respect to the OutputTube().
+//   . mid_tube_rotation = 'positive' or 'negative'
+//     . For positive the MidTube() rotates counter clockwise in tilted alpha
+//       plane with respect to the InputTube() and clockwise with respect to
+//       the OutputTube().
+//     . The mid_tube_rotation defines the swivel mounting, regarding YZ
+//       orientation, in an airplane. When the mid_tube_rotation is changed
+//       then the InputTube YZ angle needs to be changed 180 degrees, to keep
+//       the swivel pointing down.
 //   . rotating the MidTube() by theta_mid steers the thrust vector output
 //     angle theta_output_xr with respect to the x-axis, but also affects the
 //     phi_output_yz angle. Therefore the phi_input_yz angle needs to be
@@ -169,9 +168,27 @@ include <swivel_constants.scad>;
 // Swivel phi_input_yz control angle from y to z in YZ plane
 //------------------------------------------------------------------------------
 
+// InputTube YZ angle to have phi_output_yz_arr[theta_mid = 0] = 0.
+// . 270 = -c_theta_mid_phi_output_yz_crosstalk_max
+//       = PhiInputYzCrosstalkOffset('down', 'positive')
+function PhiInputYzForAnalysis() = 270;
+
+// OutputTube YZ angle to have phi_output_yz_arr[theta_mid = 0] = 0. With
+// phi_input_yz == PhiInputYzForAnalysis() then phi_output_yz(0) = 0
+function PhiOutputYzForAnalysis() = 0;
+
 // When phi_input_yz = 90, then the markers on long side of InputTube() are on
 // top, so with positive z in the ZX plane (y = 0).
 function PhiInputYzForInputMarkerUp() = 90;
+
+// When theta_mid = 0, then the swivel is straight and phi_input_yz can have
+// any value. Initialize phi_input_yz to prepare for moving the swivel in down
+// or up direction. The initial phi_input_yz depends on whether theta_mid will
+// be rotated in positive or negative direction to theta_mid = 180 = -180
+// degrees, because around theta_mid = 0 (is horizontal, straight swivel) the
+// swivel output direction changes sign.
+function InitPhiInputYzHorizontal(mid_tube_rotation) =
+    mid_tube_rotation == "positive" ? 180 : 0;
 
 // When theta_mid = 180, then the swivel has maximum tilt angle, because then
 // the long sides of the three tubes line up. The swivel then points down to
@@ -180,17 +197,6 @@ function PhiInputYzForInputMarkerUp() = 90;
 function PhiInputYzVertical(output_tube_pointing) =
     let(phi_output_yz_vertical = PhiOutputYzVertical(output_tube_pointing))
     toAngle360(phi_output_yz_vertical + 180);
-
-// When theta_mid = 0, then the swivel is straight and phi_input_yz can have
-// any value. Initialize phi_input_yz to prepare for moving the swivel in down
-// or up direction. The initial phi_input_yz depends on whether theta_mid will
-// be rotated in positive or negative direction to theta_mid = 180 = -180
-// degrees, because around theta_mid = 0 (is horizontal, straight swivel) the
-// swivel output direction changes sign.
-function InitPhiInputYzHorizontal(output_tube_pointing, mid_tube_rotation) =
-    output_tube_pointing == "down"
-        ? mid_tube_rotation == "positive" ? 180 : 0
-        : mid_tube_rotation == "positive" ? 0 : 180;
 
 
 //------------------------------------------------------------------------------
@@ -205,14 +211,14 @@ function PhiOutputYzVertical(output_tube_pointing) =
 
 // Initial phi_output_yz angle in YZ plane when theta_mid = 0, so horizontal,
 // straight swivel.
-// The swivel can be set up for and set up for pointing down or up, and the
-// control direction for theta_mid can be positive or negative. The initial
-// phi_output_yz at theta_mid = 0 is defined such that, without compensating
-// for YZ rotation due to theta_mid != 0, the swivel will reach
-// PhiOutputYzVertical() at theta_mid = 180.
-function InitPhiOutputYzHorizontal(output_tube_pointing, mid_tube_rotation) =
-    let(phi_input_yz_horizontal = InitPhiInputYzHorizontal(output_tube_pointing, mid_tube_rotation))
-    toAngle360(phi_input_yz_horizontal + 180);
+function InitPhiOutputYzHorizontal(mid_tube_rotation) =
+    InitPhiInputYzHorizontal(mid_tube_rotation);
+
+// InputTube YZ rotation offset to keep swivel in fixed YZ angle plane when
+// MidTube theta_mid is varied.
+function PhiInputYzCrosstalkOffset(output_tube_pointing, mid_tube_rotation) =
+    toAngle360(PhiInputYzVertical(output_tube_pointing) -
+               InitPhiInputYzHorizontal(mid_tube_rotation));
 
 
 //------------------------------------------------------------------------------
@@ -461,17 +467,11 @@ function DeterminePhiInputYzForPhiOutputYzAndThetaMid(x_input, x_mid, x_output, 
 //------------------------------------------------------------------------------
 
 function rDftBinsOfPhiOutputYzAsFunctionOfThetaMid(alpha_tilt,
-                                                   output_tube_pointing,
-                                                   mid_tube_rotation,
                                                    B=8, N=16) =
     // Calculate DC and first harmonic using real input rDFT of sinus like
     // part in exact phi_output_yz(theta_mid).
+    //
     // Input:
-    // . output_tube_pointing: "down" or "up"
-    // . mid_tube_rotation: for "positive" or "negative" rotation direction
-    //     of theta_mid, to initialize phi_input_yz for horizontal swivel.
-    //     This defines the swivel mounting, regarding YZ orientation, in an
-    //     airplane.
     // . B: return ampl, phase of bins 0:B-1, so B values in
     //      rdft_phi_output_yz_diff_bin_arr.
     // . N: number of points in theta_mid_arr and therefore of the DFT. The
@@ -482,23 +482,24 @@ function rDftBinsOfPhiOutputYzAsFunctionOfThetaMid(alpha_tilt,
     //   phi_output_yz(theta_mid).
     let(// First calculate exact phi_output_yz(theta_mid_arr) for N points, so
         // that with rDFT this yields N // 2 + 1 bins, with DC at bin 0.
-        phi_input_yz_horizontal = InitPhiInputYzHorizontal(output_tube_pointing, mid_tube_rotation),
-        phi_output_yz_horizontal = InitPhiOutputYzHorizontal(output_tube_pointing, mid_tube_rotation),
+        phi_input_yz_for_analysis = PhiInputYzForAnalysis(),
+        phi_output_yz_for_analysis = PhiOutputYzForAnalysis(),
+
+        // Prepare theta_mid_arr, 0 <= theta_mid < 360 degrees
         n_arr = num_range(0, 1, N - 1),
-        theta_mid_arr = mid_tube_rotation == "positive"
-                            ? [ for (n = n_arr) n / N * 360 ]  // one period of 0 to 360
-                            : [ for (n = n_arr) -n / N * 360 ],  // one period of 0 to -360
+        theta_mid_arr = [ for (n = n_arr) n / N * 360 ],  // one period of 0 to 360
+
         // Calculate exact phi_output_yz_arr
         // . can use x_input = 1, x_mid = 1, x_output = 1, because swivel thrust
         //   vector pointing direction is independent of swivel tube lengths.
         thrust_vector_arr = [ for (n = n_arr) SwivelThrustVector(1, 1, 1,
-                                                                 phi_input_yz_horizontal,
+                                                                 phi_input_yz_for_analysis,
                                                                  theta_mid_arr[n], alpha_tilt) ],
         phi_output_yz_arr = [ for (n = n_arr) toAngle360(fAngleYZ(thrust_vector_arr[n])) ],
 
         // . replace phi_output_yz_arr[theta_mid = 0] = NaN, when OutputTube is
         //   horizontal at x-axis (so z/y = 0/0)
-        phi_output_yz_arr_corrected = concat(phi_output_yz_horizontal,
+        phi_output_yz_arr_corrected = concat(phi_output_yz_for_analysis,
                                              num_slice(phi_output_yz_arr, 1, N - 1)),
 
         // Determine deviation of phi_output_yz from linear
@@ -525,12 +526,17 @@ function rDftBinsOfPhiOutputYzAsFunctionOfThetaMid(alpha_tilt,
     rdft_phi_output_yz_diff_bin_arr;
 
 
-function ApproximatePhiOutputYzAsFunctionOfThetaMid(f0_ampl, f1_ampl, theta_mid) =
+function ApproximatePhiOutputYzAsFunctionOfThetaMid(theta_mid, f1_ampl) =
     // Approximate phi_output_yz(theta_mid) using first harmonic from DFT
-    // . f0_ampl = DC = InitPhiOutputYzHorizontal()
+    //
+    // Input:
     // . f1_ampl = few degrees for the small sinus like deviation from linear
-    let(phi_output_approx_yz = f0_ampl + theta_mid / 2 - f1_ampl * sin(theta_mid))
-    phi_output_approx_yz;
+    // Return:
+    // . phi_output_yz_approx_arr: approximate phi_output_yz(theta_mid). This
+    //   needs to be compensated via phi_input_yz to keep swivel motion in ZX
+    //   plane.
+    let(phi_output_yz_approx = theta_mid / 2 - f1_ampl * sin(theta_mid))
+    phi_output_yz_approx;
 
 
 //------------------------------------------------------------------------------
@@ -541,16 +547,14 @@ function ApproximatePhiOutputYzAsFunctionOfThetaMid(f0_ampl, f1_ampl, theta_mid)
 //------------------------------------------------------------------------------
 
 function rDftBinsOfThetaOutputZxAsFunctionOfThetaMid(alpha_tilt,
-                                                     output_tube_pointing, mid_tube_rotation,
+                                                     mid_tube_rotation,
                                                      B=8, N=16) =
     // Calculate DC and first harmonic using real input rDFT of sinus like
     // signal that is created from exact theta_output_zx(theta_mid).
+    //
     // Input:
-    // . output_tube_pointing: "down" or "up"
     // . mid_tube_rotation: for "positive" or "negative" rotation direction
     //     of theta_mid, to initialize phi_input_yz for horizontal swivel.
-    //     This defines the swivel mounting, regarding YZ orientation, in an
-    //     airplane.
     // . B: return ampl, phase of bins 0:B-1, so B values in
     //      rdft_theta_output_ac_bin_arr.
     // . N: number of points in theta_mid_arr and therefore of the DFT. The
@@ -561,13 +565,13 @@ function rDftBinsOfThetaOutputZxAsFunctionOfThetaMid(alpha_tilt,
     //   theta_output_zx(theta_mid).
     let(// First calculate exact theta_output_zx(theta_mid_arr) for N points, so
         // that with rDFT this yields N // 2 + 1 bins, with DC at bin 0.
-        phi_input_yz_horizontal = InitPhiInputYzHorizontal(output_tube_pointing, mid_tube_rotation),
-        phi_output_yz_horizontal = InitPhiOutputYzHorizontal(output_tube_pointing, mid_tube_rotation),
+        phi_input_yz_horizontal = InitPhiInputYzHorizontal(mid_tube_rotation),
         theta_output_zx_horizontal = ThetaOutputZxHorizontal(),
+
+        // Prepare theta_mid_arr
         n_arr = num_range(0, 1, N - 1),
-        theta_mid_arr = mid_tube_rotation == "positive"
-                            ? [ for (n = n_arr) n / N * 360 ]  // one period of 0 to 360
-                            : [ for (n = n_arr) -n / N * 360 ],  // one period of 0 to -360
+        theta_mid_arr = [ for (n = n_arr) n / N * 360 ],  // one period of 0 to 360
+
         // Calculate exact phi_output_yz_arr
         // . can use x_input = 1, x_mid = 1, x_output = 1, because swivel thrust
         //   vector pointing direction is independent of swivel tube lengths.
@@ -601,26 +605,40 @@ function rDftBinsOfThetaOutputZxAsFunctionOfThetaMid(alpha_tilt,
     rdft_theta_output_zx_bin_arr2;
 
 
-function ApproximateThetaOutputZxAsFunctionOfThetaMid(f0_ampl, f1_ampl, theta_mid) =
+function ApproximateThetaOutputZxAsFunctionOfThetaMid(theta_mid, f0_ampl, f1_ampl) =
     // Approximate theta_output_zx(theta_mid) using first harmonic from real
     // input DFT.
+    //
+    // Input:
     // . f0_ampl = DC = ThetaOutputZxHorizontal()
     // . f1_ampl ~= SwivelTiltMax(alpha_tilt)
-    let(theta_output_zx = f0_ampl + f1_ampl * sin(theta_mid / 2))
-    theta_output_zx;
+    // Return:
+    // . theta_output_zx_approx_arr: approximate theta_output_zx(theta_mid)
+    let(theta_output_zx_approx = f0_ampl + f1_ampl * sin(theta_mid / 2))
+    theta_output_zx_approx;
 
 
 // Inverse function of ApproximateThetaOutputZxAsFunctionOfThetaMid()
-function ApproximateThetaMidAsFunctionOfThetaOutputZx(f0_ampl, f1_ampl, theta_output_zx) =
+function ApproximateThetaMidAsFunctionOfThetaOutputZx(theta_output_zx,
+                                                      f0_ampl, f1_ampl,
+                                                      mid_tube_rotation) =
     // Approximate theta_mid(theta_output_zx) using first harmonic from real
     // input DFT.
+    //
+    // Input:
     // . f0_ampl = DC = ThetaOutputZxHorizontal()
     // . f1_ampl ~= SwivelTiltMax(alpha_tilt)
+    // Return:
+    // . theta_mid_approx_arr: approximate theta_mid(theta_output_zx)
     let(theta_output_ac = theta_output_zx - f0_ampl,
         // y = arcsin(x) for -1 <= x <= 1, -90 <= y <= 90, therefore the
         // maximum theta_output_ac = f1_ampl for this approximation.
-        theta_mid = (theta_output_ac < f1_ampl)
-                         ? 2 * asin(theta_output_ac / f1_ampl)
-                         : (theta_output_ac > 0) ? 2 * 90 : -2 * 90
+        theta_mid_approx = theta_output_ac < f1_ampl
+                               ? 2 * asin(theta_output_ac / f1_ampl)
+                               : theta_output_ac > 0 ? 2 * 90 : -2 * 90,
+        // Replace theta_mid_approx == 0 by c_theta_mid_eps, to avoid undefined
+        // YZ angle for horitontal swivel
+        theta_mid_approx_eps = abs(theta_mid_approx) < c_theta_mid_eps ? c_theta_mid_eps : theta_mid_approx
        )
-    theta_mid;
+    // Account for sign of mid_tube_rotation
+    mid_tube_rotation == "positive" ? theta_mid_approx_eps : -1 * theta_mid_approx_eps;

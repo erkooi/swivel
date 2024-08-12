@@ -49,7 +49,11 @@ echo_SwivelOutputPosition(phi_input_yz, theta_mid, alpha_tilt, position_vector);
 // Echo thrust_vector
 //------------------------------------------------------------------------------
 thrust_vector = SwivelThrustVector(x_input, x_mid, x_output, phi_input_yz, theta_mid, alpha_tilt);
+thrust_vector_111 = SwivelThrustVector(1, 1, 1, phi_input_yz, theta_mid, alpha_tilt);
+echo(thrust_vector = thrust_vector);
 echo_SwivelThrustVector(phi_input_yz, theta_mid, alpha_tilt, thrust_vector);
+echo(thrust_vector_111 = thrust_vector_111);
+echo_SwivelThrustVector(phi_input_yz, theta_mid, alpha_tilt, thrust_vector_111);
 
 
 //------------------------------------------------------------------------------
@@ -81,8 +85,6 @@ N = 32;  // DFT size, choose B <= ceil(N / 2)
 echo();
 echo("Verify phi_output_yz(theta_mid)");
 phi_output_yz_bin_arr = rDftBinsOfPhiOutputYzAsFunctionOfThetaMid(alpha_tilt,
-                                                                  output_tube_pointing,
-                                                                  mid_tube_rotation,
                                                                   B, N);
 phi_output_yz_ampl_arr = phi_output_yz_bin_arr[0];
 phi_output_yz_angle_arr = phi_output_yz_bin_arr[1];
@@ -128,7 +130,6 @@ assert (num_allclose(phi_output_yz_angle_arr, phi_angle_exp, rtol=1e-05, atol=1e
 echo();
 echo("Verify theta_output_zx(theta_mid)");
 theta_output_zx_bin_arr = rDftBinsOfThetaOutputZxAsFunctionOfThetaMid(alpha_tilt,
-                                                                      output_tube_pointing,
                                                                       mid_tube_rotation,
                                                                       B, N);
 theta_output_zx_ampl_arr = theta_output_zx_bin_arr[0];

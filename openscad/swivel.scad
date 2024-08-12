@@ -15,6 +15,7 @@
 //------------------------------------------------------------------------------
 //
 // Author: E. Kooistra, March 2022
+//                      July 2024 updated
 // Purpose: Create swivel
 // Description:
 //   Selections via select value to:
@@ -59,7 +60,7 @@ use <swivel_assembly.scad>;
 //   0   StaticSwivel() = 4 times SegmentTube() with x_spacer for exploded view
 //   1   SegmentTube() for 3D print
 //
-//   2   FormSwivel() steer theta_mid with InputTube marker kept up
+//   2   FormSwivel() steer theta_mid with InputTube marker at YZ angle = 0
 //   2.1 FormSwivel() animate theta_mid with InputTube marker kept up
 //
 //   3   FormSwivel() steer theta_mid with OutputTube pointing to phi_output_yz
@@ -79,7 +80,7 @@ use <swivel_assembly.scad>;
 //                    to create a star pattern
 //   9   Trial
 
-select = 3.1;
+select = 4;
 
 
 //------------------------------------------------------------------------------
@@ -130,6 +131,7 @@ h_marker = 1;       // Height outside the body
 // OutputTube() moves down, up, left, right etc., dependents on the InputTube()
 // rotation angle phi_input_yz.
 output_tube_pointing = "down";
+//output_tube_pointing = "up";
 
 // MidTube rotation angle theta_mid around x-axis in yz plane, positive
 // theta_mid is:
@@ -156,6 +158,7 @@ theta_mid_for_thrust_angle_max = 180;
 phi_input_yz_for_input_marker_up = PhiInputYzForInputMarkerUp();  // = 90
 phi_input_yz_vertical_down = PhiInputYzVertical("down");
 phi_input_yz_vertical_up = PhiInputYzVertical("up");
+phi_input_yz_crosstalk_offset = PhiInputYzCrosstalkOffset(output_tube_pointing, mid_tube_rotation);
 
 // OutputTube pointing down angle in -z-axis direction in YZ plane
 phi_output_yz_vertical_down = PhiOutputYzVertical("down");
@@ -188,10 +191,9 @@ if (select == 0) {
                 markerColor, L_marker, d_marker, h_marker);
 
 } else if (select == 2) {
-    // Steer swivel via theta_mid and keep InputTube marker up
+    // Steer swivel via theta_mid and keep InputTube marker at YZ angle = 0
     theta_mid = 0;
     phi_input_yz = 0;
-    //phi_input_yz = phi_input_yz_for_input_marker_up;  // = 90
 
     // Apply phi_input_yz_for_input_marker_up
     FormSwivel(x_input, x_mid, x_output, R_wall_inner, d_wall, alpha_tilt,
@@ -224,11 +226,11 @@ if (select == 0) {
     // Use ? to assign theta_mid in this scope. When theta_mid is assigned
     // within if-else then that is a different scope, that gets lost after
     // the if-else is left, causing theta_mid to be undefined.
-    theta_mid_positive = ((turn_back_theta)
-                             ?   ($t < 0.5 ? $t * 360 : (1 - $t) * 360)
-                             :   ($t * 360)) + f_eps;
+    theta_mid_positive = (turn_back_theta
+                             ? $t < 0.5 ? $t * 360 : (1 - $t) * 360
+                             : $t * 360) + f_eps;
     theta_mid_negative = -1 * theta_mid_positive;
-    theta_mid = (mid_tube_rotation == "positive") ? theta_mid_positive : theta_mid_negative;
+    theta_mid = mid_tube_rotation == "positive" ? theta_mid_positive : theta_mid_negative;
 
     // Apply phi_input_yz_for_input_marker_up
     FormSwivel(x_input, x_mid, x_output, R_wall_inner, d_wall, alpha_tilt,
@@ -247,8 +249,8 @@ if (select == 0) {
 
 } else if (select == 3) {
     // Steer theta_mid and adjust phi_input_yz to get phi_output_yz.
-    theta_mid = 180;  // 0 is straight, 180 is maximum down
-    phi_output_yz = phi_output_yz_vertical_down;
+    theta_mid = 180;  // 0 is straight, 180 is maximum tilted
+    phi_output_yz = output_tube_pointing == "down" ? phi_output_yz_vertical_down : phi_output_yz_vertical_up;
 
     // Determine phi_input_yz for requested phi_output_yz and given theta_mid
     phi_input_yz = DeterminePhiInputYzForPhiOutputYzAndThetaMid(x_input, x_mid, x_output, alpha_tilt,
@@ -288,6 +290,7 @@ if (select == 0) {
         echo(thrust_angle_YZ = thrust_angle_YZ);
         echo(thrust_angle_ZX = thrust_angle_ZX);
         echo(thrust_angle_XR = thrust_angle_XR);
+        echo(theta_output_zx_horizontal = theta_output_zx_horizontal);
 
         assert(abs(position_angle_YZ - thrust_angle_YZ) < f_eps,
             "Swivel position_vector angle_YZ != Swivel thrust_vector angle_YZ");
@@ -295,8 +298,13 @@ if (select == 0) {
             "Swivel position_vector angle_XY != phi_output_yz");
         assert(abs(thrust_angle_YZ - phi_output_yz) < f_eps,
             "Swivel thrust_vector angle_XY != phi_output_yz");
-        assert(abs(thrust_angle_ZX - theta_output_zx_horizontal - thrust_angle_XR) < f_eps,
-            "Swivel thrust_vector angle_ZX - theta_output_zx_horizontal != angle_XR");
+        if (output_tube_pointing == "down") {
+            assert(thrust_angle_ZX - thrust_angle_XR - theta_output_zx_horizontal < f_eps,
+                "Swivel thrust_vector angle_ZX down - theta_output_zx_horizontal != angle_XR");
+        } else {
+            assert(toAngle360(thrust_angle_ZX + thrust_angle_XR - theta_output_zx_horizontal) < f_eps,
+                "Swivel thrust_vector angle_ZX up - theta_output_zx_horizontal != angle_XR");
+        }
     }
 
 } else if (select == 3.1) {
@@ -315,12 +323,12 @@ if (select == 0) {
     // Use ? to assign theta_mid in this scope. When theta_mid is assigned
     // within if-else then that is a different scope, that gets lost after
     // the if-else is left, causing theta_mid to be undefined.
-    theta_mid_positive = ((turn_back_theta)
-                             ?   ($t < 0.5 ? $t * 360 : (1 - $t) * 360)
-                             :   ($t * 360)) + f_eps;
+    theta_mid_positive = (turn_back_theta
+                             ?   $t < 0.5 ? $t * 360 : (1 - $t) * 360
+                             :   $t * 360) + f_eps;
     theta_mid_negative = -1 * theta_mid_positive;
-    theta_mid = (mid_tube_rotation == "positive") ? theta_mid_positive : theta_mid_negative;
-    phi_output_yz = phi_output_yz_vertical_down;
+    theta_mid = mid_tube_rotation == "positive" ? theta_mid_positive : theta_mid_negative;
+    phi_output_yz = output_tube_pointing == "down" ? phi_output_yz_vertical_down : phi_output_yz_vertical_up;
 
     // Determine phi_input_yz for requested phi_output_yz and given theta_mid
     phi_input_yz = DeterminePhiInputYzForPhiOutputYzAndThetaMid(x_input, x_mid, x_output, alpha_tilt,
@@ -389,14 +397,17 @@ if (select == 0) {
     psi_hover = animate ? $t * 360 : hover_pitch_error_max_psi;
     //psi_hover = animate ? $t * 360 : hover_yaw_error_max_psi;
 
+    // . relative hover angles
     pitch = -1 * r_hover * cos(psi_hover);  // vary theta_output for x direction
     yaw = r_hover * sin(psi_hover);  // vary phi_output_yz for y direction
 
+    // . absolute hover angles
+    request_theta_output_zx = theta_output_zx_vertical_down + pitch;
+    request_phi_output_yz_yaw = phi_output_yz_vertical_down + yaw;
+
     // Prepare single harmonic approximations
     // . for phi_output_yz from theta_mid (to keep swivel motion in ZX plane)
-    phi_output_yz_rdft_bin_arr = rDftBinsOfPhiOutputYzAsFunctionOfThetaMid(alpha_tilt,
-                                                                           output_tube_pointing,
-                                                                           mid_tube_rotation);
+    phi_output_yz_rdft_bin_arr = rDftBinsOfPhiOutputYzAsFunctionOfThetaMid(alpha_tilt);
     phi_ampl_arr = phi_output_yz_rdft_bin_arr[0];
     phi_output_yz_f0_ampl = phi_ampl_arr[0];  // = DC = InitPhiOutputYzHorizontal()
     phi_output_yz_f1_ampl = phi_ampl_arr[1];  // = few degrees for the small sinus like deviation from linear
@@ -405,7 +416,6 @@ if (select == 0) {
     // . for theta_output from theta_mid (to point swivel thrust for transition
     //   between horizontal for forward flight, and down for hover).
     theta_output_rdft_bin_arr = rDftBinsOfThetaOutputZxAsFunctionOfThetaMid(alpha_tilt,
-                                                                            output_tube_pointing,
                                                                             mid_tube_rotation);
     theta_ampl_arr = theta_output_rdft_bin_arr[0];
     theta_output_f0_ampl = theta_ampl_arr[0];  // = theta_output_zx_horizontal
@@ -414,19 +424,16 @@ if (select == 0) {
     echo(theta_output_f1_ampl = theta_output_f1_ampl);
 
     // Determine approximate theta_mid from theta_output
-    theta_output_zx = theta_output_zx_vertical_down + pitch;
-    hover_theta_mid = ApproximateThetaMidAsFunctionOfThetaOutputZx(theta_output_f0_ampl,
+    hover_theta_mid = ApproximateThetaMidAsFunctionOfThetaOutputZx(request_theta_output_zx,
+                                                                   theta_output_f0_ampl,
                                                                    theta_output_f1_ampl,
-                                                                   theta_output_zx);
+                                                                   mid_tube_rotation);
 
     // Determine approximate phi_output_yz from approximate theta_mid
-    hover_phi_offset = ApproximatePhiOutputYzAsFunctionOfThetaMid(phi_output_yz_f0_ampl,
-                                                                  phi_output_yz_f1_ampl,
-                                                                  hover_theta_mid);
-    hover_phi_adjust = phi_output_yz_vertical_down - hover_phi_offset;
-
-    // Adjust phi_input_yz to achieve wanted phi_output_yz
-    hover_phi_input_yz = phi_input_yz_vertical_down + yaw + hover_phi_adjust;
+    hover_phi_crosstalk = ApproximatePhiOutputYzAsFunctionOfThetaMid(hover_theta_mid,
+                                                                     phi_output_yz_f1_ampl);
+    // Adjust phi_input_yz for theta_mid crosstalk, to achieve wanted phi_output_yz
+    hover_phi_input_yz = request_phi_output_yz_yaw + phi_input_yz_crosstalk_offset - hover_phi_crosstalk;
 
     // Apply hover_phi_input_yz and hover_theta_mid for pitch and yaw
     FormSwivel(x_input, x_mid, x_output, R_wall_inner, d_wall, alpha_tilt,
@@ -454,14 +461,16 @@ if (select == 0) {
              hover_yaw = hover_yaw,
              hover_pitch_error = hover_pitch_error,
              hover_yaw_error = hover_yaw_error);
+
+        // verify
+        assert(abs(hover_pitch_error) < 1.0, "Too large hover pitch error.");
+        assert(abs(hover_yaw_error) < 0.1, "Too large hover yaw error.");
     }
 
 } else if (select == 5) {
     // Prepare single harmonic approximations
     // . for phi_output_yz from theta_mid (to keep swivel motion in ZX plane)
-    phi_output_yz_rdft_bin_arr = rDftBinsOfPhiOutputYzAsFunctionOfThetaMid(alpha_tilt,
-                                                                           output_tube_pointing,
-                                                                           mid_tube_rotation);
+    phi_output_yz_rdft_bin_arr = rDftBinsOfPhiOutputYzAsFunctionOfThetaMid(alpha_tilt);
     phi_ampl_arr = phi_output_yz_rdft_bin_arr[0];
     phi_output_yz_f0_ampl = phi_ampl_arr[0];  // = DC = InitPhiOutputYzHorizontal()
     phi_output_yz_f1_ampl = phi_ampl_arr[1];  // = few degrees for the small sinus like deviation from linear
@@ -470,7 +479,6 @@ if (select == 0) {
     // . for theta_output from theta_mid (to point swivel thrust for transition
     //   between horizontal for forward flight, and down for hover).
     theta_output_rdft_bin_arr = rDftBinsOfThetaOutputZxAsFunctionOfThetaMid(alpha_tilt,
-                                                                            output_tube_pointing,
                                                                             mid_tube_rotation);
     theta_ampl_arr = theta_output_rdft_bin_arr[0];
     theta_output_f0_ampl = theta_ampl_arr[0];  // = theta_output_zx_horizontal
@@ -479,24 +487,23 @@ if (select == 0) {
     echo(theta_output_f1_ampl = theta_output_f1_ampl);
 
     // Animate OutputTube transition
-    init_phi_input_yz = 0;  // use 0 for swivel movement in ZX plane
-    theta_output_zx = theta_output_zx_horizontal + ($t < 0.5 ? 2 * $t * theta_output_zx_max : 2 * (1 - $t) * theta_output_zx_max);
+    request_theta_output_zx = theta_output_zx_horizontal +
+                              ($t < 0.5 ? 2 * $t * theta_output_zx_max : 2 * (1 - $t) * theta_output_zx_max);
 
     // Determine approximate theta_mid from theta_output_zx
-    transition_theta_mid = ApproximateThetaMidAsFunctionOfThetaOutputZx(theta_output_f0_ampl,
+    transition_theta_mid = ApproximateThetaMidAsFunctionOfThetaOutputZx(request_theta_output_zx,
+                                                                        theta_output_f0_ampl,
                                                                         theta_output_f1_ampl,
-                                                                        theta_output_zx);
-    echo(theta_output_zx = theta_output_zx);
+                                                                        mid_tube_rotation);
+    echo(request_theta_output_zx = request_theta_output_zx);
     echo(transition_theta_mid = transition_theta_mid);
 
     // Determine approximate phi_output_yz from approximate theta_mid
-    transition_phi_offset = ApproximatePhiOutputYzAsFunctionOfThetaMid(phi_output_yz_f0_ampl,
-                                                                       phi_output_yz_f1_ampl,
-                                                                       transition_theta_mid);
-    transition_phi_adjust = phi_output_yz_vertical_down - transition_phi_offset;
+    transition_phi_crosstalk = ApproximatePhiOutputYzAsFunctionOfThetaMid(transition_theta_mid,
+                                                                       phi_output_yz_f1_ampl);
 
-    // Adjust phi_input_yz to achieve wanted phi_output_yz
-    transition_phi_input_yz = phi_input_yz_vertical_down + init_phi_input_yz + transition_phi_adjust;
+    // Adjust phi_input_yz for theta_mid crosstalk, to achieve wanted phi_output_yz
+    transition_phi_input_yz = phi_output_yz_vertical_down + phi_input_yz_crosstalk_offset - transition_phi_crosstalk;
 
     // Apply transition_phi_input_yz and transition_theta_mid for pitch and yaw
     FormSwivel(x_input, x_mid, x_output, R_wall_inner, d_wall, alpha_tilt,
@@ -510,19 +517,21 @@ if (select == 0) {
                                            transition_theta_mid, alpha_tilt);
 
         // pitch
-        thrust_angle_zx = theta_output_zx_horizontal + toAngle360(fAngleXR(thrust_vector));
-        transition_theta_output = thrust_angle_zx;
-        transition_theta_output_error = theta_output_zx - transition_theta_output;
+        transition_theta_output_zx = toAngle360(fAngleZX(thrust_vector));
+        transition_theta_output_zx_error = request_theta_output_zx - transition_theta_output_zx;
 
         // yaw
-        thrust_angle_yz = toAngle360(fAngleYZ(thrust_vector));
-        transition_phi_output_yz = thrust_angle_yz;
+        transition_phi_output_yz = toAngle360(fAngleYZ(thrust_vector));
         transition_phi_output_yz_error = phi_output_yz_vertical_down - transition_phi_output_yz;
 
-        echo(transition_theta_output = transition_theta_output,
+        echo(transition_theta_output_zx = transition_theta_output_zx,
              transition_phi_output_yz = transition_phi_output_yz,
-             transition_theta_output_error = transition_theta_output_error,
+             transition_theta_output_zx_error = transition_theta_output_zx_error,
              transition_phi_output_yz_error = transition_phi_output_yz_error);
+
+        // verify
+        assert(abs(transition_theta_output_zx_error) < 1.0, "Too large transition pitch error.");
+        assert(abs(transition_phi_output_yz_error) < 0.1, "Too large transition yaw error.");
     }
 
 } else if (select == 6) {
@@ -586,9 +595,9 @@ if (select == 0) {
     // t_inward  = 0.5 to 0   for t = 0.5 - < 1.0
     t_outward = $t^exponential / 0.5^(exponential - 1);
     t_inward = (1 - $t)^exponential / 0.5^(exponential - 1);
-    theta_mid = (($t < 0.5)
-                  ?   t_outward * max_theta_mid
-                  :   t_inward * max_theta_mid) + f_eps;
+    theta_mid = ($t < 0.5
+                    ? t_outward * max_theta_mid
+                    : t_inward * max_theta_mid) + f_eps;
     phi_output_yz = phi_output_yz_vertical_down + $t * 360 * nof_rotations;
 
     // Determine phi_input_yz for requested phi_output_yz and given theta_mid

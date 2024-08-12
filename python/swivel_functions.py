@@ -33,13 +33,18 @@ import linear_algebra as la
 # c_theta_mid_eps needs to be ~< 1e-7, so la.f_eps = 1e-10 is too small.
 c_theta_mid_eps = 1e-7
 
-# The swivel assembly is constructed with InputTube() long side markers up,
+# The swivel assembly is constructed with InputTube long side markers up,
 # so with phi_input_yz = 90. However the zero position for the long side
 # markers is better defined at phi_input_yz = 0. Therefore use
 # c_phi_input_yz_construction to compensate for this construction offset, by
 # subracting it from the input phi_input_yz in SwivelOutputPosition() and
 # SwivelOutputPosition_Gonio().
 c_phi_input_yz_construction = 90
+
+# The OutputTube YZ angle rotates +90 degrees when the MidTube rotates positive
+# from 0 to 180 degrees, and -90 degrees when the MidTube rotates negative from
+# 0 to -180 degrees.
+c_theta_mid_phi_output_yz_crosstalk_max = 90
 
 
 ################################################################################
@@ -160,7 +165,9 @@ def PhiInputYzForAnalysis():
     Using PhiInputYzForAnalysis() avoids that the phi_output_yz angle wraps
     around 0 or 360 degrees, so that the curve is suitable for DFT analysis.
     """
-    return 270  # = 180 + c_phi_input_yz_construction
+    # 270 = -c_theta_mid_phi_output_yz_crosstalk_max
+    #     = PhiInputYzCrosstalkOffset('down', 'positive')
+    return 270
 
 
 def PhiOutputYzForAnalysis():
@@ -199,6 +206,9 @@ def InitPhiInputYzHorizontal(mid_tube_rotation):
 def PhiInputYzVertical(output_tube_pointing):
     """InputTube YZ angle for vertical, maximum tilted swivel, when theta_mid
     = 180.
+
+    The PhiInputYzVertical() follows directly from putting the maximum tilted
+    swivel in down or up pointing and then taking the InputTube YZ angle.
     """
     phi_output_yz_vertical = PhiOutputYzVertical(output_tube_pointing)
     return la.toAngle360(phi_output_yz_vertical + 180)
@@ -225,27 +235,28 @@ def InitPhiOutputYzHorizontal(mid_tube_rotation):
     return InitPhiInputYzHorizontal(mid_tube_rotation)
 
 
-def PhiOutputYzCrosstalkOffset(output_tube_pointing, mid_tube_rotation):
-    """OutputTube YZ rotation when theta_mid is rotated from 0 to 180.
+def PhiInputYzCrosstalkOffset(output_tube_pointing, mid_tube_rotation):
+    """InputTube YZ rotation offset to keep swivel in fixed YZ angle plane
+    when MidTube theta_mid is varied.
 
     The counter rotation of InputTube YZ angle makes sure that the swivel
     OutputTube YZ angle remains constant to keep in the vertical ZX plane.
-    The required counter rotation of the InputTube YZ angle is the opposite of
-    the crosstalk offset that is caused by theta_mid on the OutputTube YZ
+    The required counter rotation of the InputTube YZ angle is the opposite
+    of the crosstalk offset that is caused by theta_mid on the OutputTube YZ
     angle when theta_mid = 180.
     """
     # if output_tube_pointing == "down":
     #     if mid_tube_rotation == "positive":
-    #         return 90
+    #         return 270  # = -c_theta_mid_phi_output_yz_crosstalk_max
     #     else:
-    #         return 270
+    #         return 90   # = c_theta_mid_phi_output_yz_crosstalk_max
     # else:
     #     if mid_tube_rotation == "positive":
-    #         return 270
+    #         return 90   # = c_theta_mid_phi_output_yz_crosstalk_max
     #     else:
-    #         return 90
-    return la.toAngle360(InitPhiInputYzHorizontal(mid_tube_rotation) -
-                         PhiInputYzVertical(output_tube_pointing))
+    #         return 270  # = -c_theta_mid_phi_output_yz_crosstalk_max
+    return la.toAngle360(PhiInputYzVertical(output_tube_pointing) -
+                         InitPhiInputYzHorizontal(mid_tube_rotation))
 
 
 # Swivel theta_output_zx thrust angle from z to x
@@ -447,13 +458,17 @@ def approximate_phi_output_yz_as_function_of_theta_mid(theta_mid_arr, f1_ampl):
         plane.
     """
     print('approximate_phi_output_yz_as_function_of_theta_mid():')
-    print('. f1_ampl = %.3f' % f1_ampl)
+    print('. f1_ampl              = %.3f' % f1_ampl)
 
-    # Approximate phi_output_yz using single harmonic approximation
+    # Crosstalk linear term in phi_output_yz(theta_mid)
+    phi_output_yz_approx_arr = theta_mid_arr / 2
+
+    # Improve approximate phi_output_yz(theta_mid) using single harmonic
+    # approximation
     # . Use cos(t + f1_angle) = cos(t + 90) = -sin(t)
     f1 = 1
     f1_phi_output_yz_arr = -f1_ampl * np.sin(np.radians(f1 * theta_mid_arr))
-    phi_output_yz_approx_arr = theta_mid_arr / 2 + f1_phi_output_yz_arr
+    phi_output_yz_approx_arr += f1_phi_output_yz_arr
     return phi_output_yz_approx_arr
 
 
@@ -546,8 +561,7 @@ def rfft_bins_of_theta_output_zx_as_function_of_theta_mid(alpha_tilt,
 
 
 def approximate_theta_output_zx_as_function_of_theta_mid(theta_mid_arr,
-                                                         f0_ampl,
-                                                         f1_ampl, f1_angle):
+                                                         f0_ampl, f1_ampl):
     """Approximate theta_output_zx(theta_mid) using first harmonic from real
     input DFT.
 
@@ -558,13 +572,12 @@ def approximate_theta_output_zx_as_function_of_theta_mid(theta_mid_arr,
          theta_output_zx_approx_arr
     . f0_ampl: DC from rDFT of exact. DC = +f0_ampl, because f0_angle = 0, so
         cos(f0_angle) = +1, and no need to pass f0_angle on.
-      f1_ampl, f1_angle: first harmonics from rDFT of exact
-        theta_output_zx(theta_mid).
+      f1_ampl: first harmonic from rDFT of exact theta_output_zx(theta_mid).
     Return:
     . theta_output_zx_approx_arr: approximate theta_output_zx(theta_mid)
     """
     print('approximate_theta_output_zx_as_function_of_theta_mid()')
-    print('. f0_ampl = %.3f, f1_ampl = %.3f, f1_angle = %.1f' % (f0_ampl, f1_ampl, f1_angle))
+    print('. f0_ampl = %.3f, f1_ampl = %.3f' % (f0_ampl, f1_ampl))
 
     # Approximate theta_output_zx using single harmonic approximation
     # . Use cos(t + f1_angle) = cos(t - 90) = sin(t)
@@ -576,8 +589,7 @@ def approximate_theta_output_zx_as_function_of_theta_mid(theta_mid_arr,
 
 # Inverse function of approximate_theta_output_zx_as_function_of_theta_mid()
 def approximate_theta_mid_as_function_of_theta_output_zx(theta_output_zx_arr,
-                                                         f0_ampl,
-                                                         f1_ampl, f1_angle,
+                                                         f0_ampl, f1_ampl,
                                                          mid_tube_rotation):
     """Approximate theta_mid(theta_output_zx) using first harmonic from real
     input DFT.
@@ -589,7 +601,7 @@ def approximate_theta_mid_as_function_of_theta_output_zx(theta_output_zx_arr,
     . theta_mid_approx_arr: approximate theta_mid(theta_output_zx)
     """
     print('approximate_theta_mid_as_function_of_theta_output_zx()')
-    print('. f0_ampl = %.3f, f1_ampl = %.3f, f1_angle = %.1f' % (f0_ampl, f1_ampl, f1_angle))
+    print('. f0_ampl = %.3f, f1_ampl = %.3f' % (f0_ampl, f1_ampl))
     print('. mid_tube_rotation = %s' % mid_tube_rotation)
 
     # Approximate theta_mid using single harmonic approximation
