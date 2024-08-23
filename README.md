@@ -3,11 +3,21 @@
 For a video with animations of the swivel and more information please also check my channel "Eric Kooistra - Hobby" on YouTube: https://www.youtube.com/@EricKooistra-Hobby
 
 ## 1 3D-printed swivel model
-The swivel model consists of four identical tube segments, one as input tube, two for the mid tube, and one as output tube. After 3D printing, the two segments for the mid tube are glued together and then bolted to the input segment and to the output segment. The bolts should be so tight that the tubes maintain their position, but can be rotated manually.
+The swivel model consists of four identical tube segments, one as input tube, two for the mid tube, and one as output tube.
+
+![picture](pictures/select_0_StaticSwivel.jpg)
+
+Figure 1.1: Four identical tube segments for swivel model
+
+After 3D printing, the two segments for the mid tube are glued together and then bolted to the input segment and to the output segment. The bolts should be so tight that the tubes maintain their position, but can be rotated manually.
 
 ![picture](pictures/swivel_bolt.jpg)
 
-Figure 1: 3D printed swivel model
+Figure 1.2: 3D printed swivel model
+
+In an application of the swivel typically has three slew bearings.
+* one slew bearing to connect the input tube to the fixed tube in the airplane, to rotate the swivel in the YZ plane.
+* two slew bearings to connect the mid tube to the input tube and to the output tube, to point the swivel between straigt and maximum tilted.
 
 ## 2 Swivel model definitions
 The swivel is at the tail of an airplane. The airplane is oriented with up in positive Z direction and right in positive Y direction. For forward flight the airplane flies in negative X direction, and the swivel thrust vector points horizontal in positive X direction.
