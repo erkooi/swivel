@@ -198,9 +198,9 @@ phi_output_yz(theta_mid) ~= theta_mid / 2 - phi_output_yz_f1_ampl * sin(theta_mi
 theta_output_xr(theta_mid) ~= theta_output_xr_f1_ampl * abs(sin(theta_mid / 2))
 . for all theta_mid by using abs(), because XR angle in [0:180]
 . theta_output_xr_f1_ampl ~= 4 * alpha_tilt
-```
+
 and inverse:
-```
+
 theta_mid(theta_output_xr) ~=       2 * arcsin(f1_fraction) when MidTube rotation = 'positive'
 theta_mid(theta_output_xr) ~= 360 - 2 * arcsin(f1_fraction) when MidTube rotation = 'negative'
 . with f1_fraction = theta_output_xr / theta_output_xr_f1_ampl,
