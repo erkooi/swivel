@@ -87,8 +87,12 @@ The Figure below shows the swivel model in OpenSCAD. The initial phi_input_yz = 
 
 Figure 3: Swivel model in OpenSCAD
 
-## 4 Operation in an airplane
+### 3.4 Swivel output pointing control procedure
+1. Choose a swivel output pointing via OutputTube YZ angle and OutputTube XR angle
+2. Approximate MidTube angle from requested OutputTube XR angle
+3. Approximate InputTube YZ angle from requested OutputTube YZ angle and YZ crosstalk due to MidTube angle
 
+## 4 Operation in an airplane
 The swivel is suitable operation in an airplane for:
 * forward flight,
 * hovering,
@@ -155,7 +159,7 @@ The swivel model is formed from four tube segments using **rotate** and **transl
 ### 6.1 Files in swivel/python
 Add library path to PYTHONPATH environment variable.
 
-* swivel.ipynb, swivel.html - jupyter notebook to determine harmonic approximation of phi_output_yz(theta_mid) and theta_output_zx(theta_mid)
+* swivel.ipynb, swivel.html - jupyter notebook to determine harmonic approximation of phi_output_yz(theta_mid) and theta_output_xr(theta_mid)
 * swivel_functions.py - functions to calculate the orientation of the swivel, equivalent to swivel_functions.scad
 * try_swivel.py - try swivel pointings
 
@@ -169,11 +173,11 @@ Rotating the mid tube by theta_mid changes the pointing of the output tube. For 
 
 Figure 7.1: Exact function phi_output_yz(theta_mid)
 
-The function theta_output_zx(theta_mid) shows how the swivel output pointing depends on the rotation by theta_mid of the mid tube:
+The function theta_output_xr(theta_mid) shows how the swivel output pointing depends on the rotation by theta_mid of the mid tube:
 
-![picture](pictures/theta_output_zx_as_function_of_theta_mid.jpg)
+![picture](pictures/theta_output_xr_as_function_of_theta_mid.jpg)
 
-Figure 7.2: Excact function theta_output_zx(theta_mid)
+Figure 7.2: Excact function theta_output_xr(theta_mid)
 
 ### 7.2 Harmonic approximation using the DFT
 The exact formula for swivel output control is huge, because it has in the order of hundred terms (see SwivelOutputPosition_Gonio() function in swivel_functions.scad). Therefore it may need to be approximated to be able to implement it in a real time application, using e.g.:
@@ -181,23 +185,26 @@ The exact formula for swivel output control is huge, because it has in the order
 * a precalculated lookup table with values from the exact formula,
 * an approximation formula that is close to the exact formula, but much simpler to calculate.
 
-The function for phi_output_yz(theta_mid) in Figure 7.1 almost linear, the deviation suggests that adding the first harmonic frequency component deviation yields a good approximation. The function for theta_output_zx(theta_mid) in Figure 7.2 looks like the first halve of a sinus, this suggest that the first harmonic frequency component of concat(theta_output_zx(theta_mid), -theta_output_zx(theta_mid)) yields a good approximation. The harmonic components are obtained using the Discrete Fourier Transform (DFT) for real input signals (rDFT). With analysis and plots from the swivel.ipynb jupyter notebook this results in:
-```
-* phi_output_yz(theta_mid) ~= phi_output_yz_horizontal + theta_mid / 2 - phi_output_yz_f1_ampl * sin(theta_mid)
-* theta_output_zx(theta_mid) ~= theta_output_zx_horizontal + theta_output_zx_f1_ampl * sin(theta_mid / 2)
+The function for phi_output_yz(theta_mid) in Figure 7.1 almost linear, the deviation suggests that adding the first harmonic frequency component deviation yields a good approximation. The function for theta_output_xr(theta_mid) in Figure 7.2 looks like the first halve of a sinus, this suggest that the first harmonic frequency component of concat(theta_output_xr(theta_mid), -theta_output_xr(theta_mid)) yields a good approximation. The harmonic components are obtained using the Discrete Fourier Transform (DFT) for real input signals (rDFT). The f1_ampl of the first harmonic follows from the DFT analysis of the exact formula. With analysis and plots from the swivel.ipynb jupyter notebook this results in:
 
-  . for 0 <= theta_mid <= 360 degrees, so for all theta_mid,
-  . the f1_ampl follow from the DFT analysis of the exact formulas:
-    . phi_output_yz_f1_ampl is a few degrees that approximates the small deviation from linear
-    . theta_output_zx_f1_ampl ~= 4 * alpha_tilt
+* Crosstalk between MidTube angle and OutputTube YZ angle:
+```
+phi_output_yz(theta_mid) ~= theta_mid / 2 - phi_output_yz_f1_ampl * sin(theta_mid)
+. for theta_mid in [0:360], to have correct linear term
+. phi_output_yz_f1_ampl is a few degrees that approximates the small deviation from linear
+```
+* OutputTube XR tilt angle due to MidTube angle:
+```
+theta_output_xr(theta_mid) ~= theta_output_xr_f1_ampl * abs(sin(theta_mid / 2))
+. for all theta_mid by using abs(), because XR angle in [0:180]
+. theta_output_xr_f1_ampl ~= 4 * alpha_tilt
 ```
 and inverse:
 ```
-* theta_mid(theta_output_zx) ~=  2 * arcsin(f1_fraction) when mid_tube_rotation = 'positive' 
-  theta_mid(theta_output_zx) ~= -2 * arcsin(f1_fraction) when mid_tube_rotation = 'negative' 
-
-   . for abs(f1_fraction) <= 1, because -1 <= x <= +1 for arcsin(x)
-   . with f1_fraction = (theta_output_zx - theta_output_zx_horizontal) / theta_output_zx_f1_ampl
+theta_mid(theta_output_xr) ~=       2 * arcsin(f1_fraction) when MidTube rotation = 'positive'
+theta_mid(theta_output_xr) ~= 360 - 2 * arcsin(f1_fraction) when MidTube rotation = 'negative'
+. with f1_fraction = theta_output_xr / theta_output_xr_f1_ampl,
+. f1_fraction in [0, 1], because theta_output_xr in [0:180] and to fit -1 <= x <= +1 for arcsin(x)
 ```
 
 ### 7.3 Real input DFT support in OpenSCAD
