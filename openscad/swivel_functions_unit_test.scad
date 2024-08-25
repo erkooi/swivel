@@ -126,17 +126,16 @@ assert (num_allclose(phi_output_yz_ampl_arr, phi_ampl_exp, rtol=1e-05, atol=1e-0
 assert (num_allclose(phi_output_yz_angle_arr, phi_angle_exp, rtol=1e-05, atol=1e-08), "Wrong phi_output_yz_angle_arr");
 
 
-// Verify theta_output_zx(theta_mid)
+// Verify theta_output_xr(theta_mid)
 echo();
-echo("Verify theta_output_zx(theta_mid)");
-theta_output_zx_bin_arr = rDftBinsOfThetaOutputZxAsFunctionOfThetaMid(alpha_tilt,
-                                                                      mid_tube_rotation,
+echo("Verify theta_output_xr(theta_mid)");
+theta_output_xr_bin_arr = rDftBinsOfThetaOutputXrAsFunctionOfThetaMid(alpha_tilt,
                                                                       B, N);
-theta_output_zx_ampl_arr = theta_output_zx_bin_arr[0];
-theta_output_zx_angle_arr = theta_output_zx_bin_arr[1];
+theta_output_xr_ampl_arr = theta_output_xr_bin_arr[0];
+theta_output_xr_angle_arr = theta_output_xr_bin_arr[1];
 
 // . expected values from swivel.ipynb for N = 1024
-theta_output_zx_ampl_exp = [90,  // = DC = ThetaOutputZxHorizontal()
+theta_output_xr_ampl_exp = [ 0,  // = DC
                             99.179360973761930609,
                              0,
                              0.802431588024201337,
@@ -152,7 +151,7 @@ theta_output_zx_ampl_exp = [90,  // = DC = ThetaOutputZxHorizontal()
                              0.000000023746520276,
                              0];
 
-theta_output_zx_angle_exp = [  0,
+theta_output_xr_angle_exp = [  0,
                              -90.0,
                                0,
                               90.0,
@@ -168,15 +167,15 @@ theta_output_zx_angle_exp = [  0,
                              -90.0,
                                0];
 
-theta_ampl_exp = num_slice(theta_output_zx_ampl_exp, 0, B - 1);
-theta_angle_exp = num_slice(theta_output_zx_angle_exp, 0, B - 1);
-echo(theta_output_zx_ampl_arr = theta_output_zx_ampl_arr);
-echo(theta_output_zx_ampl_exp = theta_ampl_exp);
-echo(theta_output_zx_angle_arr = theta_output_zx_angle_arr);
-echo(theta_output_zx_angle_exp = theta_angle_exp);
+theta_ampl_exp = num_slice(theta_output_xr_ampl_exp, 0, B - 1);
+theta_angle_exp = num_slice(theta_output_xr_angle_exp, 0, B - 1);
+echo(theta_output_xr_ampl_arr = theta_output_xr_ampl_arr);
+echo(theta_output_xr_ampl_exp = theta_ampl_exp);
+echo(theta_output_xr_angle_arr = theta_output_xr_angle_arr);
+echo(theta_output_xr_angle_exp = theta_angle_exp);
 
-assert (num_allclose(theta_output_zx_ampl_arr, theta_ampl_exp, rtol=1e-05, atol=1e-08), "Wrong theta_output_zx_ampl_arr");
-assert (num_allclose(theta_output_zx_angle_arr, theta_angle_exp, rtol=1e-05, atol=1e-08), "Wrong theta_output_zx_angle_arr");
+assert (num_allclose(theta_output_xr_ampl_arr, theta_ampl_exp, rtol=1e-05, atol=1e-08), "Wrong theta_output_xr_ampl_arr");
+assert (num_allclose(theta_output_xr_angle_arr, theta_angle_exp, rtol=1e-05, atol=1e-08), "Wrong theta_output_xr_angle_arr");
 
 //------------------------------------------------------------------------------
 // All asserts when OK when program gets to here

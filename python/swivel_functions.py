@@ -69,7 +69,7 @@ class SwivelAngles:
         self.mid_tube_rotation = mid_tube_rotation
 
         # Constants
-        self.swivel_tilt_vertical = self.SwivelTiltXrVertical()
+        self.swivel_tilt_xr_vertical = self.SwivelTiltXrVertical()
         self.phi_input_yz_for_marker_up = self.PhiInputYzForInputMarkerUp()
         self.phi_input_yz_for_analysis = self.PhiInputYzForAnalysis()
         self.phi_output_yz_for_analysis = self.PhiOutputYzForAnalysis()
@@ -102,7 +102,7 @@ class SwivelAngles:
         print('. output_tube_pointing       = %s' % self.output_tube_pointing)
         print('. mid_tube_rotation          = %s' % self.mid_tube_rotation)
         print('Constant swivel angles:')
-        print('. swivel_tilt_vertical                     = %.0f' % self.swivel_tilt_vertical)
+        print('. swivel_tilt_xr_vertical                  = %.0f' % self.swivel_tilt_xr_vertical)
         print('. phi_input_yz_for_marker_up               = %.0f' % self.phi_input_yz_for_marker_up)
         print('. phi_input_yz_for_analysis                = %.0f' % self.phi_input_yz_for_analysis)
         print('. phi_output_yz_for_analysis               = %.0f' % self.phi_output_yz_for_analysis)
@@ -140,7 +140,7 @@ class SwivelAngles:
                                                             self.InitPhiInputYzHorizontal(pointing, sign),
                                                             self.InitPhiOutputYzHorizontal(pointing, sign)))
 
-    # Swivel OutputTube YZ angle = 0 when swivel is straight for anaylysis of
+    # Swivel OutputTube YZ angle = 0 when swivel is straight for analysis of
     # phi_output_yz(theta_mid) function.
     def PhiInputYzForAnalysis(self):
         """InputTube YZ angle to have phi_output_yz_arr[theta_mid = 0] = 0.
@@ -191,8 +191,9 @@ class SwivelAngles:
         meanwhile compensating the InputTube YZ angle to keep the swivel output
         in the vertical ZX plane.
 
-        Note that mid_tube_rotation is defined positive for thta_mid from 0 to
-        180 downto 0 and defined negative for theta_mid from 0 downto -180 to 0.
+        Note that mid_tube_rotation is defined positive for theta_mid from 0 to
+        180 downto 0 and defined negative for theta_mid from 360 downto 180 to
+        360 (= 0 downto -180 to 0).
         """
         if output_tube_pointing == "down":
             if mid_tube_rotation == "positive":
@@ -235,7 +236,7 @@ class SwivelAngles:
         """
         return self.InitPhiInputYzHorizontal(output_tube_pointing, mid_tube_rotation)
 
-    # Swivel theta_output_zx thrust angle from z to x
+    # Swivel theta_output_xr thrust angle with respect to x-axis
     def SwivelTiltXrMax(self, alpha_tilt):
         """Maximum swivel thrust XR angle."""
         return alpha_tilt * 4
@@ -244,9 +245,18 @@ class SwivelAngles:
         """XR angle for vertical swivel."""
         return 90
 
+    # Swivel theta_output_zx thrust angle from z to x
     def ThetaOutputZxHorizontal(self):
         """Horizontal swivel thrust angle theta_output_zx in ZX plane."""
         return 90
+
+    def ThetaOutputZxAngle(self, theta_output_xr, output_tube_pointing):
+        """Swivel thrust theta_output_zx from theta_output_xr."""
+        if output_tube_pointing == "down":
+            theta_output_zx = self.ThetaOutputZxHorizontal() + theta_output_xr
+        else:
+            theta_output_zx = self.ThetaOutputZxHorizontal() - theta_output_xr
+        return theta_output_zx
 
     def ThetaOutputZxMax(self, alpha_tilt):
         """Maximum swivel thrust theta_output_zx angle (with swivel output down)."""
@@ -418,14 +428,29 @@ def FindThetaMidForThetaOutputXr(theta_output_xr_request, theta_output_xr_resolu
             else:
                 break
             n = n + 1
+    # Map MidTube angle theta_mid in [0:180] to <0:180] or to [180:360>
+    # dependent on the mid_tube_rotation.
+    theta_mid_arr = map_theta_mid_rotation([theta_mid], mid_tube_rotation)
+    return theta_mid_arr[0]
 
-    # Account for MidTube rotation direction
-    if np.isclose(theta_mid, 0, atol=c_theta_mid_eps):
-        theta_mid = c_theta_mid_eps
+
+def map_theta_mid_rotation(theta_mid_180_arr, mid_tube_rotation):
+    """Map theta_mid in [0:180] to <0:180] or to [180:360>, dependent on
+    mid_tube_rotation.
+
+    . Assume all theta_mid in theta_mid_180_arr are in [0:180]
+    . Replace theta_mid ~= 0 by c_theta_mid_eps to get <0:180]. To avoid
+      undefined YZ angle for horizontal swivel.
+    . Keep theta_mid <0:180] when MidTube rotation is positive, else negate
+      theta_mid by 360 - theta_mid, if MidTube rotation direction is negative.
+    """
+    theta_mid_positive_arr = np.array(
+        [c_theta_mid_eps if np.isclose(tm, 0, atol=c_theta_mid_eps) else
+         tm for tm in theta_mid_180_arr])
     if mid_tube_rotation == 'positive':
-        return theta_mid
+        return theta_mid_positive_arr  # theta_mid in <0:180]
     else:
-        return 360 - theta_mid
+        return 360 - theta_mid_positive_arr  # theta_mid in [180:360>
 
 
 ################################################################################
@@ -543,10 +568,12 @@ def approximate_phi_output_yz_as_function_of_theta_mid(theta_mid_arr, f1_ampl,
     """Approximate phi_output_yz(theta_mid) using the first harmonic from DFT.
 
     Equation:
-      phi_output_yz(theta_mid) ~= -phi_input_yz_for_analysis + phi_output_yz_crosstalk_arr
+      phi_output_yz(theta_mid) ~=
+         -phi_input_yz_for_analysis + approximate_phi_output_yz_crosstalk(theta_mid_arr, f1_ampl)
 
-         with: phi_output_yz_crosstalk_arr = theta_mid / 2 - f1_ampl * sin(theta_mid)
-               for theta_mid in [0:360>
+         with: approximate_phi_output_yz_crosstalk(theta_mid_arr, f1_ampl) =
+                   theta_mid / 2 - f1_ampl * sin(theta_mid)
+         for theta_mid in [0:360>
 
     Input:
     . theta_mid_arr: MidTube angles in [0:360> to evaluate for
@@ -668,8 +695,7 @@ def rfft_bins_of_theta_output_xr_as_function_of_theta_mid(alpha_tilt, N=16):
 
     # Create sinus like signal from theta_output_arr and negated copy
     N2 = 2 * N
-    theta_output_xr_negated_arr = -theta_output_xr_arr
-    theta_output_xr_arr2 = np.append(theta_output_xr_arr, theta_output_xr_negated_arr)
+    theta_output_xr_arr2 = np.append(theta_output_xr_arr, -theta_output_xr_arr)
 
     # Determine harmonics in theta_output_arr2 using rFFT
     # . scale k = 0 DC by 1 / N2
@@ -712,6 +738,7 @@ def approximate_theta_output_xr_as_function_of_theta_mid(theta_mid_arr, f1_ampl)
     Equation:
       theta_output_xr = f1_ampl * abs(sin(theta_mid / 2))
       . for theta_mid in [0:360>
+      . use abs() because XR angle in [0:180>
 
     Input:
     . theta_mid_arr: MidTube angles in [0:360> to evaluate in the equation
@@ -744,19 +771,20 @@ def approximate_theta_mid_as_function_of_theta_output_xr(theta_output_xr_arr,
     limit it to f1_ampl.
 
     Equation:
-      theta_mid ~= 2 * arcsin(fraction)
+      theta_mid ~= 2 * arcsin(f1_fraction)
 
       with:
       . f1_theta_output_xr_ampl ~= swivel_tilt_xr_max, first harmonic from rDFT
         of exact theta_output_xr(theta_mid).
-      . fraction = theta_output_xr / f1_theta_output_xr_ampl
-        fraction = 1 if fraction > 1 (so theta_output_xr > f1_theta_output_xr_ampl)
-        fraction in [0:1], because theta_output_xr >= 0
-      . theta_mid in [0:180], because fraction in [0:1]
+      . f1_fraction = theta_output_xr / f1_theta_output_xr_ampl
+        f1_fraction = 1 if f1_fraction > 1 (so theta_output_xr >
+                      f1_theta_output_xr_ampl)
+        f1_fraction in [0:1], because theta_output_xr >= 0
+      . theta_mid in [0:180], because f1_fraction in [0:1]
         theta_mid = c_theta_mid_eps if theta_mid < c_theta_mid_eps ~= 0
         theta_mid in <0:180] when mid_tube_rotation is positive
         theta_mid = 360 - theta_mid, when mid_tube_rotation is negative, so in
-        [180:360>
+                    [180:360>
 
     Input:
     . theta_output_xr_arr: OutputTube XR angles to evaluate in the equation.
@@ -779,15 +807,13 @@ def approximate_theta_mid_as_function_of_theta_output_xr(theta_output_xr_arr,
     #   straight swivel when theta_output_xr ~= 0.
     f1_fraction_arr = [xr / f1_ampl if xr < f1_ampl else
                        1 for xr in theta_output_xr_arr]
+    # . MidTube angle in [0:180]
     f1_theta_mid_approx_arr = 2 * np.degrees(np.arcsin(f1_fraction_arr))
 
-    # Account for MidTube rotation direction
-    theta_mid_approx_arr = np.array([c_theta_mid_eps if np.isclose(theta_mid, 0, atol=c_theta_mid_eps) else
-                                    theta_mid for theta_mid in f1_theta_mid_approx_arr])
-    if mid_tube_rotation == 'positive':
-        return theta_mid_approx_arr
-    else:
-        return 360 - theta_mid_approx_arr
+    # Map MidTube angles in [0:180] to <0:180] or to [180:360> dependent on the
+    # mid_tube_rotation.
+    theta_mid_approx_arr = map_theta_mid_rotation(f1_theta_mid_approx_arr, mid_tube_rotation)
+    return theta_mid_approx_arr
 
 
 ################################################################################
