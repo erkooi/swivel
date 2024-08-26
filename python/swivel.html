@@ -14428,10 +14428,33 @@ a.anchor-link {
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <h1 id="1.-Swivel-parameters">1. Swivel parameters<a class="anchor-link" href="#1.-Swivel-parameters">&#182;</a></h1>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
 <div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[5]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Model selections</span>
+<span class="c1"># . Set True to enable first harmonic in approximation from real DFT of exact function</span>
+<span class="n">use_f1_phi_output_yz_ampl</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">use_f1_theta_output_xr_ampl</span> <span class="o">=</span> <span class="kc">True</span>
+
+<span class="c1"># . Uncomment to select control option</span>
+<span class="n">output_tube_pointing</span> <span class="o">=</span> <span class="s1">&#39;down&#39;</span><span class="p">;</span> <span class="n">mid_tube_rotation</span> <span class="o">=</span> <span class="s1">&#39;positive&#39;</span>
+<span class="c1">#output_tube_pointing = &#39;down&#39;; mid_tube_rotation = &#39;negative&#39;</span>
+<span class="c1">#output_tube_pointing = &#39;up&#39;; mid_tube_rotation = &#39;positive&#39;</span>
+<span class="c1">#output_tube_pointing = &#39;up&#39;; mid_tube_rotation = &#39;negative&#39;</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[6]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Swivel tube segment</span>
@@ -14488,16 +14511,49 @@ angle_yz_resolution        = 0.200
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[6]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[7]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Uncomment to select control option</span>
-<span class="n">output_tube_pointing</span> <span class="o">=</span> <span class="s1">&#39;down&#39;</span><span class="p">;</span> <span class="n">mid_tube_rotation</span> <span class="o">=</span> <span class="s1">&#39;positive&#39;</span>
-<span class="c1">#output_tube_pointing = &#39;down&#39;; mid_tube_rotation = &#39;negative&#39;</span>
-<span class="c1">#output_tube_pointing = &#39;up&#39;; mid_tube_rotation = &#39;positive&#39;</span>
-<span class="c1">#output_tube_pointing = &#39;up&#39;; mid_tube_rotation = &#39;negative&#39;</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Approximation accuracy:&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;. use_f1_phi_output_yz_ampl   = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">use_f1_phi_output_yz_ampl</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;. use_f1_theta_output_xr_ampl = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">use_f1_theta_output_xr_ampl</span><span class="p">)</span>
+</pre></div>
 
-<span class="n">sa</span> <span class="o">=</span> <span class="n">sw</span><span class="o">.</span><span class="n">SwivelAngles</span><span class="p">(</span><span class="n">alpha_tilt</span><span class="p">,</span> <span class="n">output_tube_pointing</span><span class="p">,</span> <span class="n">mid_tube_rotation</span><span class="p">)</span>
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
+<pre>Approximation accuracy:
+. use_f1_phi_output_yz_ampl   = True
+. use_f1_theta_output_xr_ampl = True
+</pre>
+</div>
+</div>
+
+</div>
+
+</div>
+
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[8]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">sa</span> <span class="o">=</span> <span class="n">sw</span><span class="o">.</span><span class="n">SwivelAngles</span><span class="p">(</span><span class="n">alpha_tilt</span><span class="p">,</span> <span class="n">output_tube_pointing</span><span class="p">,</span> <span class="n">mid_tube_rotation</span><span class="p">)</span>
 <span class="n">sa</span><span class="o">.</span><span class="n">LogSwivelAngles</span><span class="p">()</span>
 </pre></div>
 
@@ -14523,7 +14579,7 @@ angle_yz_resolution        = 0.200
 . output_tube_pointing       = down
 . mid_tube_rotation          = positive
 Constant swivel angles:
-. swivel_tilt_vertical                     = 90
+. swivel_tilt_xr_vertical                  = 90
 . phi_input_yz_for_marker_up               = 90
 . phi_input_yz_for_analysis                = 270
 . phi_output_yz_for_analysis               = 0
@@ -14531,7 +14587,7 @@ Constant swivel angles:
 . theta_output_zx_horizontal               = 90
 . theta_output_zx_horizontal               = 90
 Derived from alpha_tilt:
-. swivel_tilt_max            = 100
+. swivel_tilt_xr_max         = 100
 . theta_output_zx_max        = 190
 . theta_output_zx_min        = -10
 Derived from output_tube_pointing:
@@ -14552,7 +14608,7 @@ Derived from output_tube_pointing and mid_tube_rotation:
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[7]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[9]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">sa</span><span class="o">.</span><span class="n">LogYzAnglesTable</span><span class="p">()</span>
@@ -14601,7 +14657,7 @@ pointing  rotation
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[8]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[10]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># No need to calculate swivel position vector (p_vector), only need to use swivel</span>
@@ -14612,8 +14668,7 @@ pointing  rotation
     
 <span class="c1"># Do analysis with InputTube YZ angle that yields phi_output_yz_analysis_arr[theta_mid = 0] = 0</span>
 <span class="n">phi_input_yz_for_analysis_arr</span> <span class="o">=</span> <span class="p">[</span><span class="n">sa</span><span class="o">.</span><span class="n">phi_input_yz_for_analysis</span><span class="p">]</span> <span class="o">*</span> <span class="n">N_points</span> <span class="o">*</span> <span class="n">N_periods</span>
-<span class="n">t_vector_list</span> <span class="o">=</span> <span class="n">sw</span><span class="o">.</span><span class="n">SwivelThrustVectorsList</span><span class="p">(</span><span class="n">x_input</span><span class="p">,</span> <span class="n">x_mid</span><span class="p">,</span> <span class="n">x_output</span><span class="p">,</span> <span class="n">alpha_tilt</span><span class="p">,</span>
-                                           <span class="n">phi_input_yz_for_analysis_arr</span><span class="p">,</span> <span class="n">theta_mid_periods_arr</span><span class="p">)</span>
+<span class="n">t_vector_list</span> <span class="o">=</span> <span class="n">sw</span><span class="o">.</span><span class="n">SwivelThrustVectorsList</span><span class="p">(</span><span class="n">alpha_tilt</span><span class="p">,</span> <span class="n">phi_input_yz_for_analysis_arr</span><span class="p">,</span> <span class="n">theta_mid_periods_arr</span><span class="p">)</span>
 <span class="n">phi_output_yz_analysis_arr</span> <span class="o">=</span> <span class="n">la</span><span class="o">.</span><span class="n">toAngleArr360</span><span class="p">(</span><span class="n">la</span><span class="o">.</span><span class="n">fAngleArrYZ</span><span class="p">(</span><span class="n">t_vector_list</span><span class="p">))</span>
 <span class="c1"># Do analysis with OutputTube XR angle, so independent of YZ angle</span>
 <span class="n">theta_output_xr_analysis_arr</span> <span class="o">=</span> <span class="n">la</span><span class="o">.</span><span class="n">fAngleArrXR</span><span class="p">(</span><span class="n">t_vector_list</span><span class="p">)</span>
@@ -14672,7 +14727,7 @@ np.isnan(phi_output_yz_analysis_arr) =  [ True False False ... False False False
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[9]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[11]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># phi_output_yz angle in YZ plane as function of theta_mid</span>
@@ -14740,7 +14795,7 @@ np.isnan(phi_output_yz_analysis_arr) =  [ True False False ... False False False
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[10]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[12]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Keep one period of of the MidTube rotation</span>
@@ -14757,7 +14812,7 @@ np.isnan(phi_output_yz_analysis_arr) =  [ True False False ... False False False
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[11]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[13]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Deviation of phi_output_yz from linear part</span>
@@ -14804,7 +14859,7 @@ np.isnan(phi_output_yz_analysis_arr) =  [ True False False ... False False False
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[12]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[14]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Check symmetry in phi_output_yz_diff_arr for 0 &lt; theta_mid &lt; 360</span>
@@ -14859,7 +14914,7 @@ np.isnan(phi_output_yz_analysis_arr) =  [ True False False ... False False False
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[13]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[15]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Check symmetry in phi_output_yz_diff_arr for 0 &lt; theta_mid &lt; 180</span>
@@ -14940,7 +14995,7 @@ np.isnan(phi_output_yz_analysis_arr) =  [ True False False ... False False False
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[14]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[16]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Determine harmonics in phi_output_yz_diff_arr using FFT</span>
@@ -14980,16 +15035,16 @@ np.isnan(phi_output_yz_analysis_arr) =  [ True False False ... False False False
 
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>fi =  0 : fi_ampl = 0.000000000000005664, fi_angle = 180.0000000000
-fi =  1 : fi_ampl = 2.816002962662007558, fi_angle =  90.0000000000
-fi =  2 : fi_ampl = 0.069201193814899378, fi_angle = -90.0000000000
-fi =  3 : fi_ampl = 0.002267424331060616, fi_angle =  90.0000000000
-fi =  4 : fi_ampl = 0.000083580418418892, fi_angle = -89.9999999988
-fi =  5 : fi_ampl = 0.000003286283323405, fi_angle =  90.0000000096
-fi =  6 : fi_ampl = 0.000000134596644143, fi_angle = -89.9999994998
-fi =  7 : fi_ampl = 0.000000005670194352, fi_angle =  89.9999985630
-fi =  8 : fi_ampl = 0.000000000243845798, fi_angle = -90.0001186596
-fi =  9 : fi_ampl = 0.000000000010653876, fi_angle =  90.0034017353
+<pre>fi =  0 : fi_ampl = 0.000000000000005735, fi_angle = 180.0000000000
+fi =  1 : fi_ampl = 2.816002962662007114, fi_angle =  90.0000000000
+fi =  2 : fi_ampl = 0.069201193814898990, fi_angle = -90.0000000000
+fi =  3 : fi_ampl = 0.002267424331060894, fi_angle =  90.0000000000
+fi =  4 : fi_ampl = 0.000083580418419470, fi_angle = -89.9999999990
+fi =  5 : fi_ampl = 0.000003286283323111, fi_angle =  90.0000000071
+fi =  6 : fi_ampl = 0.000000134596644153, fi_angle = -89.9999995885
+fi =  7 : fi_ampl = 0.000000005670194694, fi_angle =  90.0000041775
+fi =  8 : fi_ampl = 0.000000000243845933, fi_angle = -90.0001922220
+fi =  9 : fi_ampl = 0.000000000010653701, fi_angle =  89.9998585888
 </pre>
 </div>
 </div>
@@ -15001,7 +15056,7 @@ fi =  9 : fi_ampl = 0.000000000010653876, fi_angle =  90.0034017353
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[15]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[17]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Subtract frequency components from phi_output_yz_diff_arr</span>
@@ -15072,7 +15127,7 @@ fi = 1 : ampl = 2.8160029627, angle =   90.0
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[16]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[18]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Single harmonic approximation for phi_output_yz as function of theta_mid</span>
@@ -15082,7 +15137,12 @@ fi = 1 : ampl = 2.8160029627, angle =   90.0
 <span class="c1"># Determine harmonics in exact phi_output_yz(theta_mid)</span>
 <span class="n">rfft_phi_output_yz_diff_ampl_arr</span><span class="p">,</span> <span class="n">rfft_phi_output_yz_diff_angle_arr</span> <span class="o">=</span> \
     <span class="n">sw</span><span class="o">.</span><span class="n">rfft_bins_of_phi_output_yz_as_function_of_theta_mid</span><span class="p">(</span><span class="n">alpha_tilt</span><span class="p">,</span> <span class="n">N_points</span><span class="p">)</span>
-<span class="n">f1_phi_output_yz_ampl</span> <span class="o">=</span> <span class="n">rfft_phi_output_yz_diff_ampl_arr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<span class="k">if</span> <span class="n">use_f1_phi_output_yz_ampl</span><span class="p">:</span>
+    <span class="c1"># Default use first harmonic in crosstalk approximation</span>
+    <span class="n">f1_phi_output_yz_ampl</span> <span class="o">=</span> <span class="n">rfft_phi_output_yz_diff_ampl_arr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="c1"># Optionally only use the linear theta_mid / 2 term, see SNR to see effect</span>
+    <span class="n">f1_phi_output_yz_ampl</span> <span class="o">=</span> <span class="mi">0</span>
 <span class="n">phi_output_yz_crosstalk_arr</span> <span class="o">=</span> <span class="n">sw</span><span class="o">.</span><span class="n">approximate_phi_output_yz_crosstalk</span><span class="p">(</span><span class="n">theta_mid_360_arr</span><span class="p">,</span>
                                                                      <span class="n">f1_phi_output_yz_ampl</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;phi_output_yz_analysis_arr =&#39;</span><span class="p">,</span> <span class="n">phi_output_yz_analysis_arr</span><span class="p">)</span>
@@ -15127,7 +15187,7 @@ phi_output_yz_crosstalk_arr = [0.00000000e+00 1.58502581e-01 3.17005812e-01 ... 
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[17]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[19]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Plot error in approximated phi_output_yz_crosstalk_arr(theta_mid)</span>
@@ -15178,7 +15238,7 @@ phi_output_yz_crosstalk_arr = [0.00000000e+00 1.58502581e-01 3.17005812e-01 ... 
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[18]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[20]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">result</span> <span class="o">=</span> <span class="n">sw</span><span class="o">.</span><span class="n">log_and_verify_input_tube_control_near_horizontal</span><span class="p">(</span><span class="n">f1_phi_output_yz_ampl</span><span class="p">)</span>
@@ -15232,12 +15292,14 @@ PASSED
 
 <pre><code>phi_input_yz_control = phi_output_yz_request - phi_output_yz_approx(theta_mid)
 
-phi_output_yz_approx(theta_mid) ~= -phi_input_yz_for_analysis + theta_mid / 2 - f1_phi_output_yz_ampl * sin(theta_mid)
-    with:
-    . phi_input_yz_for_analysis = -90
-    . theta_mid in [0 : 360&gt;
-    . f1_phi_output_yz_ampl = first harmonic from DFT of harmonic part in exact phi_output_yz(theta_mid),
-        few degrees, approximates the small deviation from linear crosstalk,</code></pre>
+where:
+    phi_output_yz_approx(theta_mid) ~= -phi_input_yz_for_analysis +
+                                       theta_mid / 2 - f1_phi_output_yz_ampl * sin(theta_mid)
+        with:
+        . phi_input_yz_for_analysis = -90
+        . theta_mid in [0 : 360&gt;
+        . f1_phi_output_yz_ampl = first harmonic from DFT of harmonic part in exact phi_output_yz(theta_mid),
+          few degrees, approximates the small deviation from linear crosstalk,</code></pre>
 
 </div>
 </div>
@@ -15253,7 +15315,7 @@ phi_output_yz_approx(theta_mid) ~= -phi_input_yz_for_analysis + theta_mid / 2 - 
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[19]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[21]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># theta_output_xr angle as function of theta_mid</span>
@@ -15321,7 +15383,7 @@ max(theta_output_xr_analysis) = 100.0
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[20]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[22]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Check symmetry in theta_output_xr_analysis_arr for 0 &lt; theta_mid &lt; 360</span>
@@ -15372,7 +15434,7 @@ max(theta_output_xr_analysis) = 100.0
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[21]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[23]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Create symmetrical sinus like signal from theta_output_arr</span>
@@ -15420,7 +15482,7 @@ max(theta_output_xr_analysis) = 100.0
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[22]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[24]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Determine harmonics in theta_output_arr2 using FFT</span>
@@ -15468,17 +15530,17 @@ max(theta_output_xr_analysis) = 100.0
 <pre>fi =  0 : ampl = 0.000000000000000000, angle =   0.0000000000
 fi =  1 : ampl = 99.179360973761930609, angle = -90.0000000000
 fi =  2 : ampl = 0.000000000000000000, angle =   0.0000000000
-fi =  3 : ampl = 0.802431588024202891, angle =  90.0000000000
+fi =  3 : ampl = 0.802431588024202336, angle =  90.0000000000
 fi =  4 : ampl = 0.000000000000000000, angle =   0.0000000000
-fi =  5 : ampl = 0.017673589176769929, angle = -90.0000000000
+fi =  5 : ampl = 0.017673589176770546, angle = -90.0000000000
 fi =  6 : ampl = 0.000000000000000000, angle =   0.0000000000
-fi =  7 : ampl = 0.000515964517513054, angle =  89.9999999998
+fi =  7 : ampl = 0.000515964517513531, angle =  89.9999999998
 fi =  8 : ampl = 0.000000000000000000, angle =   0.0000000000
-fi =  9 : ampl = 0.000017236506752369, angle = -90.0000000047
+fi =  9 : ampl = 0.000017236506750920, angle = -90.0000000027
 fi = 10 : ampl = 0.000000000000000000, angle =   0.0000000000
-fi = 11 : ampl = 0.000000623287701764, angle =  90.0000000077
+fi = 11 : ampl = 0.000000623287701160, angle =  90.0000000045
 fi = 12 : ampl = 0.000000000000000000, angle =   0.0000000000
-fi = 13 : ampl = 0.000000023746519466, angle = -90.0000004058
+fi = 13 : ampl = 0.000000023746519375, angle = -90.0000000940
 fi = 14 : ampl = 0.000000000000000000, angle =   0.0000000000
 </pre>
 </div>
@@ -15491,7 +15553,7 @@ fi = 14 : ampl = 0.000000000000000000, angle =   0.0000000000
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[23]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[25]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Subtract frequency components from theta_output_xr_arr2</span>
@@ -15562,7 +15624,7 @@ fi =  1 : ampl = 99.17936, angle =  -90.0
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[24]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[26]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Single harmonic approximation for theta_output_xr(theta_mid)</span>
@@ -15572,7 +15634,15 @@ fi =  1 : ampl = 99.17936, angle =  -90.0
 <span class="c1"># Determine harmonics in exact theta_output_xr(theta_mid)</span>
 <span class="n">rfft_theta_output_xr_ampl_arr</span><span class="p">,</span> <span class="n">rfft_theta_output_xr_angle_arr</span> <span class="o">=</span> \
     <span class="n">sw</span><span class="o">.</span><span class="n">rfft_bins_of_theta_output_xr_as_function_of_theta_mid</span><span class="p">(</span><span class="n">alpha_tilt</span><span class="p">,</span> <span class="n">N_points</span><span class="p">)</span>
-<span class="n">f1_theta_output_xr_ampl</span> <span class="o">=</span> <span class="n">rfft_theta_output_xr_ampl_arr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># ~= swivel_tilt_max</span>
+<span class="k">if</span> <span class="n">use_f1_theta_output_xr_ampl</span><span class="p">:</span>
+    <span class="c1"># Default use first harmonic term rfft_theta_output_xr_ampl_arr[1] ~= swivel_tilt_xr_max,</span>
+    <span class="c1"># but &lt; swivel_tilt_xr_max due to small third harmonic term</span>
+    <span class="n">f1_theta_output_xr_ampl</span> <span class="o">=</span> <span class="n">rfft_theta_output_xr_ampl_arr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="c1"># Optionally use swivel_tilt_xr_max instead, to have zero error at maximum tilt XR angle</span>
+    <span class="c1"># (so when MidTube theta_mid = 180), but somewhat larger error on average as follows from</span>
+    <span class="c1"># SNR (see transition application).</span>
+    <span class="n">f1_theta_output_xr_ampl</span> <span class="o">=</span> <span class="n">sa</span><span class="o">.</span><span class="n">swivel_tilt_xr_max</span>
 <span class="n">theta_output_xr_approx_arr</span> <span class="o">=</span> <span class="n">sw</span><span class="o">.</span><span class="n">approximate_theta_output_xr_as_function_of_theta_mid</span><span class="p">(</span><span class="n">theta_mid_360_arr</span><span class="p">,</span>
                                                                                      <span class="n">f1_theta_output_xr_ampl</span><span class="p">)</span>
 </pre></div>
@@ -15610,7 +15680,7 @@ approximate_theta_output_xr_as_function_of_theta_mid()
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[25]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[27]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Plot error in approximated theta_output_xr(theta_mid)</span>
@@ -15656,14 +15726,19 @@ approximate_theta_output_xr_as_function_of_theta_mid()
 </div>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h2 id="4.2-Conclusion:-Approximate-OutputTube-XR-angle-control">4.2 <strong>Conclusion: Approximate OutputTube XR angle control</strong><a class="anchor-link" href="#4.2-Conclusion:-Approximate-OutputTube-XR-angle-control">&#182;</a></h2><h3 id="4.2.1-theta_output_xr(theta_mid)">4.2.1 theta_output_xr(theta_mid)<a class="anchor-link" href="#4.2.1-theta_output_xr(theta_mid)">&#182;</a></h3><p>Approximate swivel OutputTube XR angle theta_output_xr as function of MidTube angle theta_mid:</p>
+<h2 id="4.2-Conclusion:-Approximate-OutputTube-XR-angle-control">4.2 <strong>Conclusion: Approximate OutputTube XR angle control</strong><a class="anchor-link" href="#4.2-Conclusion:-Approximate-OutputTube-XR-angle-control">&#182;</a></h2><p>Swivel OutputTube pointing in ZX plane:</p>
 
-<pre><code>theta_output_xr ~= f1_theta_output_xr_ampl * sin(theta_mid / 2)
+<pre><code>theta_output_zx = theta_output_zx_horizontal + theta_output_xr when output_tube_pointing == 'down'
+                  theta_output_zx_horizontal - theta_output_xr when output_tube_pointing == 'up'</code></pre>
+<h3 id="4.2.1-theta_output_xr(theta_mid)">4.2.1 theta_output_xr(theta_mid)<a class="anchor-link" href="#4.2.1-theta_output_xr(theta_mid)">&#182;</a></h3><p>Approximate swivel OutputTube XR angle theta_output_xr as function of MidTube angle theta_mid:</p>
+
+<pre><code>theta_output_xr ~= f1_theta_output_xr_ampl * abs(sin(theta_mid / 2))
 
     with:
     . f1_theta_output_xr_ampl ~= swivel_tilt_xr_max, first harmonic from rDFT of exact theta_output_xr(theta_mid).
-    . theta_mid in [0 : 360&gt;, so sin(theta_mid) &gt;= 0</code></pre>
-<h3 id="4.2.2-theta_mid(theta_output_xr)">4.2.2 theta_mid(theta_output_xr)<a class="anchor-link" href="#4.2.2-theta_mid(theta_output_xr)">&#182;</a></h3><p>Approximate MidTube angle theta_mid as function of swivel OutputTube XR angle theta_output_xr:</p>
+    . theta_output_xr in [0:180] for theta_mid in [0 : 360&gt;, so sin(theta_mid) &gt;= 0, or for all theta_mid using
+      abs(sin(theta_mid)).</code></pre>
+<h3 id="4.2.2-Inverse-function:-theta_mid(theta_output_xr)">4.2.2 Inverse function: theta_mid(theta_output_xr)<a class="anchor-link" href="#4.2.2-Inverse-function:-theta_mid(theta_output_xr)">&#182;</a></h3><p>Approximate MidTube angle theta_mid as function of swivel OutputTube XR angle theta_output_xr:</p>
 
 <pre><code>theta_mid ~= 2 * arcsin(fraction)
 
@@ -15686,7 +15761,7 @@ approximate_theta_output_xr_as_function_of_theta_mid()
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[26]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[28]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Find theta_mid for theta_output_xr</span>
@@ -15694,7 +15769,7 @@ approximate_theta_output_xr_as_function_of_theta_mid()
 <span class="n">nof_steps</span> <span class="o">=</span> <span class="mi">11</span>
 <span class="n">p</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># use p &gt; 1 to have finer theta_output_xr resolution in hover range around 90 degrees tilted</span>
 <span class="n">p</span> <span class="o">=</span> <span class="mi">4</span>
-<span class="n">theta_output_xr_list</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">sa</span><span class="o">.</span><span class="n">swivel_tilt_max</span><span class="o">**</span><span class="n">p</span><span class="p">,</span> <span class="n">nof_steps</span><span class="p">)</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">p</span><span class="p">)</span>
+<span class="n">theta_output_xr_list</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">sa</span><span class="o">.</span><span class="n">swivel_tilt_xr_max</span><span class="o">**</span><span class="n">p</span><span class="p">,</span> <span class="n">nof_steps</span><span class="p">)</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">p</span><span class="p">)</span>
 <span class="n">theta_output_xr_resolution</span> <span class="o">=</span> <span class="mf">0.01</span>  <span class="c1"># resolution in degrees, to determine theta_mid(theta_output_xr)</span>
 <span class="n">theta_mid_list</span> <span class="o">=</span> <span class="p">[]</span>
 <span class="n">theta_mid_prev</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">NaN</span>
@@ -15703,7 +15778,7 @@ approximate_theta_output_xr_as_function_of_theta_mid()
 <span class="k">for</span> <span class="n">theta_output_xr_request</span> <span class="ow">in</span> <span class="n">theta_output_xr_list</span><span class="p">:</span>
     <span class="n">theta_mid</span> <span class="o">=</span> <span class="n">sw</span><span class="o">.</span><span class="n">FindThetaMidForThetaOutputXr</span><span class="p">(</span><span class="n">theta_output_xr_request</span><span class="p">,</span> <span class="n">theta_output_xr_resolution</span><span class="p">,</span>
                                                 <span class="n">alpha_tilt</span><span class="p">,</span> <span class="n">mid_tube_rotation</span><span class="p">)</span>
-    <span class="n">t_vector</span> <span class="o">=</span> <span class="n">sw</span><span class="o">.</span><span class="n">SwivelThrustVector</span><span class="p">(</span><span class="n">x_input</span><span class="p">,</span> <span class="n">x_mid</span><span class="p">,</span> <span class="n">x_output</span><span class="p">,</span> <span class="n">alpha_tilt</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">theta_mid</span><span class="p">)</span>
+    <span class="n">t_vector</span> <span class="o">=</span> <span class="n">sw</span><span class="o">.</span><span class="n">SwivelThrustVector</span><span class="p">(</span><span class="n">alpha_tilt</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">theta_mid</span><span class="p">)</span>
     <span class="n">theta_output_xr</span> <span class="o">=</span> <span class="n">la</span><span class="o">.</span><span class="n">fAngleXR</span><span class="p">(</span><span class="n">t_vector</span><span class="p">)</span>
     <span class="n">theta_mid_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">theta_mid</span><span class="p">)</span>
     <span class="n">theta_mid_delta</span> <span class="o">=</span> <span class="n">theta_mid</span> <span class="o">-</span> <span class="n">theta_mid_prev</span>
@@ -15753,7 +15828,7 @@ request    result
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[27]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[29]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Plot theta_mid(theta_output_xr)</span>
@@ -15808,7 +15883,7 @@ request    result
 </div>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h1 id="6.-Application:-Hover-control">6. Application: Hover control<a class="anchor-link" href="#6.-Application:-Hover-control">&#182;</a></h1><p>Model small swivel output movements around vertical down for hover control. Requires swivel_tilt_max &gt; 90 to be able to move the swivel around vertical down in the ZX plane.</p>
+<h1 id="6.-Application:-Hover-control">6. Application: Hover control<a class="anchor-link" href="#6.-Application:-Hover-control">&#182;</a></h1><p>Model small swivel output movements around vertical down for hover control. Requires swivel_tilt_xr_max &gt; 90 to be able to move the swivel around vertical down in the ZX plane.</p>
 <ul>
 <li>varying theta_mid yields pitch control (in ZX plane),</li>
 <li>varying phi_input_yz yields yaw control (in YZ plane),</li>
@@ -15820,7 +15895,7 @@ request    result
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[28]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[30]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Define hover motion for circular motion around swivel vertical:</span>
@@ -15829,7 +15904,7 @@ request    result
 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;sa.theta_output_zx_horizontal =&#39;</span><span class="p">,</span> <span class="n">sa</span><span class="o">.</span><span class="n">theta_output_zx_horizontal</span><span class="p">)</span>
 
 <span class="c1"># Hover circle radius in XY plane</span>
-<span class="n">hover_ampl</span> <span class="o">=</span> <span class="n">f1_theta_output_xr_ampl</span> <span class="o">-</span> <span class="n">sa</span><span class="o">.</span><span class="n">swivel_tilt_vertical</span>
+<span class="n">hover_ampl</span> <span class="o">=</span> <span class="n">f1_theta_output_xr_ampl</span> <span class="o">-</span> <span class="n">sa</span><span class="o">.</span><span class="n">swivel_tilt_xr_vertical</span>
 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;hover_ampl =&#39;</span><span class="p">,</span> <span class="n">hover_ampl</span><span class="p">)</span>
 
 <span class="c1"># Hover circle angle in XY plane</span>
@@ -15837,11 +15912,8 @@ request    result
 
 <span class="c1"># Vary theta_output_zx in ZX plane for x direction</span>
 <span class="n">pitch_arr</span> <span class="o">=</span> <span class="n">hover_ampl</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">psi_hover_arr</span><span class="p">))</span>
-<span class="n">request_theta_output_xr_pitch_arr</span> <span class="o">=</span> <span class="n">sa</span><span class="o">.</span><span class="n">swivel_tilt_vertical</span> <span class="o">+</span> <span class="n">pitch_arr</span>
-<span class="k">if</span> <span class="n">output_tube_pointing</span> <span class="o">==</span> <span class="s1">&#39;down&#39;</span><span class="p">:</span>
-    <span class="n">request_theta_output_zx_pitch_arr</span> <span class="o">=</span> <span class="n">sa</span><span class="o">.</span><span class="n">theta_output_zx_horizontal</span> <span class="o">+</span> <span class="n">request_theta_output_xr_pitch_arr</span>
-<span class="k">else</span><span class="p">:</span>
-    <span class="n">request_theta_output_zx_pitch_arr</span> <span class="o">=</span> <span class="n">sa</span><span class="o">.</span><span class="n">theta_output_zx_horizontal</span> <span class="o">-</span> <span class="n">request_theta_output_xr_pitch_arr</span>
+<span class="n">request_theta_output_xr_pitch_arr</span> <span class="o">=</span> <span class="n">sa</span><span class="o">.</span><span class="n">swivel_tilt_xr_vertical</span> <span class="o">+</span> <span class="n">pitch_arr</span>
+<span class="n">request_theta_output_zx_pitch_arr</span> <span class="o">=</span> <span class="n">sa</span><span class="o">.</span><span class="n">ThetaOutputZxAngle</span><span class="p">(</span><span class="n">request_theta_output_xr_pitch_arr</span><span class="p">,</span> <span class="n">output_tube_pointing</span><span class="p">)</span>
 
 <span class="c1"># Vary phi_output_yz in YZ plane for y direction</span>
 <span class="n">yaw_arr</span> <span class="o">=</span> <span class="n">hover_ampl</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">psi_hover_arr</span><span class="p">))</span>
@@ -15881,7 +15953,7 @@ hover_ampl = 9.17936097376193
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[29]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[31]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Approximate hover control:</span>
@@ -15937,12 +16009,11 @@ approximate_phi_output_yz_as_function_of_theta_mid():
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[30]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[32]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Apply hover control:</span>
-<span class="n">t_vector_list</span> <span class="o">=</span> <span class="n">sw</span><span class="o">.</span><span class="n">SwivelThrustVectorsList</span><span class="p">(</span><span class="n">x_input</span><span class="p">,</span> <span class="n">x_mid</span><span class="p">,</span> <span class="n">x_output</span><span class="p">,</span> <span class="n">alpha_tilt</span><span class="p">,</span>
-                                           <span class="n">hover_phi_input_yz_arr</span><span class="p">,</span> <span class="n">hover_theta_mid_arr</span><span class="p">)</span>
+<span class="n">t_vector_list</span> <span class="o">=</span> <span class="n">sw</span><span class="o">.</span><span class="n">SwivelThrustVectorsList</span><span class="p">(</span><span class="n">alpha_tilt</span><span class="p">,</span> <span class="n">hover_phi_input_yz_arr</span><span class="p">,</span> <span class="n">hover_theta_mid_arr</span><span class="p">)</span>
 
 <span class="c1"># Get OutputTube pointing YZ and ZX angles</span>
 <span class="n">result_phi_output_yz_yaw_arr</span> <span class="o">=</span> <span class="n">la</span><span class="o">.</span><span class="n">toAngleArr360</span><span class="p">(</span><span class="n">la</span><span class="o">.</span><span class="n">fAngleArrYZ</span><span class="p">(</span><span class="n">t_vector_list</span><span class="p">))</span>
@@ -15961,7 +16032,7 @@ approximate_phi_output_yz_as_function_of_theta_mid():
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[31]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[33]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Log arrays</span>
@@ -15982,7 +16053,7 @@ approximate_phi_output_yz_as_function_of_theta_mid():
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[32]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[34]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Plot hover control</span>
@@ -16045,7 +16116,7 @@ approximate_phi_output_yz_as_function_of_theta_mid():
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[33]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[35]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Plot hover result</span>
@@ -16112,7 +16183,7 @@ approximate_phi_output_yz_as_function_of_theta_mid():
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[34]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[36]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Check hover result</span>
@@ -16184,7 +16255,50 @@ hover_ampl_error_max  =   0.821, hover_ampl_error_max_percent  =   8.94 % at psi
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[35]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[37]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Signal to Noise Ratio (SNR) for requested value relative to the error in dB</span>
+<span class="n">SNR_hover_pitch</span> <span class="o">=</span> <span class="n">sw</span><span class="o">.</span><span class="n">snr</span><span class="p">(</span><span class="n">pitch_arr</span><span class="p">,</span> <span class="n">hover_pitch_error_arr</span><span class="p">)</span>
+<span class="n">SNR_hover_yaw</span> <span class="o">=</span> <span class="n">sw</span><span class="o">.</span><span class="n">snr</span><span class="p">(</span><span class="n">yaw_arr</span><span class="p">,</span> <span class="n">hover_yaw_error_arr</span><span class="p">)</span>
+<span class="n">SNR_hover_ampl</span> <span class="o">=</span> <span class="n">sw</span><span class="o">.</span><span class="n">snr</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">hover_ampl</span><span class="p">]</span> <span class="o">*</span> <span class="n">N_points</span><span class="p">),</span> <span class="n">hover_ampl_error_arr</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;SNR_hover_pitch = </span><span class="si">%.1f</span><span class="s1"> dB&#39;</span> <span class="o">%</span> <span class="n">SNR_hover_pitch</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;SNR_hover_yaw = </span><span class="si">%.1f</span><span class="s1"> dB&#39;</span> <span class="o">%</span> <span class="n">SNR_hover_yaw</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;SNR_hover_ampl = </span><span class="si">%.1f</span><span class="s1"> dB&#39;</span> <span class="o">%</span> <span class="n">SNR_hover_ampl</span><span class="p">)</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
+<pre>SNR_hover_pitch = 22.8 dB
+SNR_hover_yaw = 41.6 dB
+SNR_hover_ampl = 27.3 dB
+</pre>
+</div>
+</div>
+
+</div>
+
+</div>
+
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[38]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Plot hover pitch control and error</span>
@@ -16240,7 +16354,7 @@ hover_ampl_error_max  =   0.821, hover_ampl_error_max_percent  =   8.94 % at psi
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[36]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[39]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Plot hover yaw control and error</span>
@@ -16296,7 +16410,7 @@ hover_ampl_error_max  =   0.821, hover_ampl_error_max_percent  =   8.94 % at psi
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[37]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[40]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Plot hover ampl control and error</span>
@@ -16358,7 +16472,7 @@ hover_ampl_error_max  =   0.821, hover_ampl_error_max_percent  =   8.94 % at psi
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[38]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[41]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Define transition motion to transition swivel between horizontal and maximum tilt in ZX plane:</span>
@@ -16368,16 +16482,12 @@ hover_ampl_error_max  =   0.821, hover_ampl_error_max_percent  =   8.94 % at psi
 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;sa.theta_output_zx_horizontal = &#39;</span><span class="p">,</span> <span class="n">sa</span><span class="o">.</span><span class="n">theta_output_zx_horizontal</span><span class="p">)</span>
 
 <span class="c1"># Select maximum tilt</span>
-<span class="n">theta_output_xr_transition_max</span> <span class="o">=</span> <span class="n">sa</span><span class="o">.</span><span class="n">swivel_tilt_max</span>  <span class="c1"># maximum tilt for exact</span>
-<span class="n">theta_output_xr_transition_max</span> <span class="o">=</span> <span class="n">f1_theta_output_xr_ampl</span>  <span class="c1"># maximum tilt for approximation</span>
+<span class="n">theta_output_xr_transition_max</span> <span class="o">=</span> <span class="n">f1_theta_output_xr_ampl</span>  <span class="c1"># tilt as far as possible</span>
 <span class="c1">#theta_output_xr_transition_max = swivel_tilt_vertical  # tilt vertical</span>
 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;theta_output_xr_transition_max = &#39;</span><span class="p">,</span> <span class="n">theta_output_xr_transition_max</span><span class="p">)</span>
 
 <span class="n">request_theta_output_xr_transition_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">theta_output_xr_transition_max</span><span class="p">,</span> <span class="n">N_points</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="k">if</span> <span class="n">output_tube_pointing</span> <span class="o">==</span> <span class="s1">&#39;down&#39;</span><span class="p">:</span>
-    <span class="n">request_theta_output_zx_transition_arr</span> <span class="o">=</span> <span class="n">sa</span><span class="o">.</span><span class="n">theta_output_zx_horizontal</span> <span class="o">+</span> <span class="n">request_theta_output_xr_transition_arr</span>
-<span class="k">else</span><span class="p">:</span>
-    <span class="n">request_theta_output_zx_transition_arr</span> <span class="o">=</span> <span class="n">sa</span><span class="o">.</span><span class="n">theta_output_zx_horizontal</span> <span class="o">-</span> <span class="n">request_theta_output_xr_transition_arr</span>
+<span class="n">request_theta_output_zx_transition_arr</span> <span class="o">=</span> <span class="n">sa</span><span class="o">.</span><span class="n">ThetaOutputZxAngle</span><span class="p">(</span><span class="n">request_theta_output_xr_transition_arr</span><span class="p">,</span> <span class="n">output_tube_pointing</span><span class="p">)</span>
 </pre></div>
 
      </div>
@@ -16410,7 +16520,7 @@ theta_output_xr_transition_max =  99.17936097376193
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[39]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[42]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Approximate transition control:</span>
@@ -16466,12 +16576,11 @@ approximate_phi_output_yz_as_function_of_theta_mid():
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[40]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[43]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Apply transition control:</span>
-<span class="n">t_vector_list</span> <span class="o">=</span> <span class="n">sw</span><span class="o">.</span><span class="n">SwivelThrustVectorsList</span><span class="p">(</span><span class="n">x_input</span><span class="p">,</span> <span class="n">x_mid</span><span class="p">,</span> <span class="n">x_output</span><span class="p">,</span> <span class="n">alpha_tilt</span><span class="p">,</span>
-                                           <span class="n">transition_phi_input_yz_arr</span><span class="p">,</span> <span class="n">transition_theta_mid_arr</span><span class="p">)</span>
+<span class="n">t_vector_list</span> <span class="o">=</span> <span class="n">sw</span><span class="o">.</span><span class="n">SwivelThrustVectorsList</span><span class="p">(</span><span class="n">alpha_tilt</span><span class="p">,</span> <span class="n">transition_phi_input_yz_arr</span><span class="p">,</span> <span class="n">transition_theta_mid_arr</span><span class="p">)</span>
 
 <span class="c1"># . get InputTube YZ angles</span>
 <span class="n">result_phi_output_yz_transition_arr</span> <span class="o">=</span> <span class="n">la</span><span class="o">.</span><span class="n">toAngleArr360</span><span class="p">(</span><span class="n">la</span><span class="o">.</span><span class="n">fAngleArrYZ</span><span class="p">(</span><span class="n">t_vector_list</span><span class="p">))</span>
@@ -16490,7 +16599,7 @@ approximate_phi_output_yz_as_function_of_theta_mid():
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[41]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[44]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Log arrays</span>
@@ -16512,7 +16621,7 @@ approximate_phi_output_yz_as_function_of_theta_mid():
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[42]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[45]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Plot transition control</span>
@@ -16573,7 +16682,7 @@ approximate_phi_output_yz_as_function_of_theta_mid():
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[43]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[46]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Check transition result</span>
@@ -16589,7 +16698,7 @@ approximate_phi_output_yz_as_function_of_theta_mid():
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[44]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[47]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Plot transition result</span>
@@ -16634,6 +16743,48 @@ approximate_phi_output_yz_as_function_of_theta_mid():
 >
 </div>
 
+</div>
+
+</div>
+
+</div>
+
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[48]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Signal to Noise Ratio (SNR) for requested value relative to the error in dB</span>
+<span class="n">SNR_phi_output_yz_transition</span> <span class="o">=</span> <span class="n">sw</span><span class="o">.</span><span class="n">snr</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">request_phi_output_yz_transition</span><span class="p">]</span> <span class="o">*</span> <span class="n">N_points</span><span class="p">),</span>
+                                      <span class="n">transition_phi_output_yz_error_arr</span><span class="p">)</span>
+<span class="n">SNR_theta_output_zx_transition</span> <span class="o">=</span> <span class="n">sw</span><span class="o">.</span><span class="n">snr</span><span class="p">(</span><span class="n">request_theta_output_zx_transition_arr</span><span class="p">,</span>
+                                        <span class="n">transition_theta_output_zx_error_arr</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;SNR_phi_output_yz_transition = </span><span class="si">%.1f</span><span class="s1"> dB&#39;</span> <span class="o">%</span> <span class="n">SNR_phi_output_yz_transition</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;SNR_theta_output_zx_transition = </span><span class="si">%.1f</span><span class="s1"> dB&#39;</span> <span class="o">%</span> <span class="n">SNR_theta_output_zx_transition</span><span class="p">)</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
+<pre>SNR_phi_output_yz_transition = 74.9 dB
+SNR_theta_output_zx_transition = 48.2 dB
+</pre>
+</div>
 </div>
 
 </div>
