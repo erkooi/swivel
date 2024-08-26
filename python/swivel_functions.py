@@ -77,7 +77,7 @@ class SwivelAngles:
         self.theta_output_zx_horizontal = self.ThetaOutputZxHorizontal()
 
         # Derived from alpha_tilt
-        self.swivel_tilt_max = self.SwivelTiltXrMax(alpha_tilt)
+        self.swivel_tilt_xr_max = self.SwivelTiltXrMax(alpha_tilt)
         self.theta_output_zx_max = self.ThetaOutputZxMax(alpha_tilt)
         self.theta_output_zx_min = self.ThetaOutputZxMin(alpha_tilt)
 
@@ -110,7 +110,7 @@ class SwivelAngles:
         print('. theta_output_zx_horizontal               = %.0f' % self.theta_output_zx_horizontal)
         print('. theta_output_zx_horizontal               = %.0f' % self.theta_output_zx_horizontal)
         print('Derived from alpha_tilt:')
-        print('. swivel_tilt_max            = %.0f' % self.swivel_tilt_max)
+        print('. swivel_tilt_xr_max         = %.0f' % self.swivel_tilt_xr_max)
         print('. theta_output_zx_max        = %.0f' % self.theta_output_zx_max)
         print('. theta_output_zx_min        = %.0f' % self.theta_output_zx_min)
         print('Derived from output_tube_pointing:')
@@ -342,7 +342,7 @@ def SwivelOutputPosition_Gonio(x_input, x_mid, x_output, alpha_tilt, phi_input_y
 ################################################################################
 # Swivel thrust_vector
 
-def SwivelThrustVector(x_input, x_mid, x_output, alpha_tilt, phi_input_yz, theta_mid):
+def SwivelThrustVector(alpha_tilt, phi_input_yz, theta_mid):
     """Calculate thrust vector of swivel output.
 
     . As function of InputTube YZ angle phi_input_yz and MidTube angle
@@ -350,25 +350,27 @@ def SwivelThrustVector(x_input, x_mid, x_output, alpha_tilt, phi_input_yz, theta
     . Replace theta_mid == 0 by theta_mid = la.f_eps to avoid arctan() = nan
       for YZ angle of the thrust vector when the swivel is straight.
     . Uses matrices.
+    . The thrust vector pointing does not depend on x_input, x_mid, x_output,
+      so use fixed 1, 1, 1 and 1, 1, 0 to derive the pointing.
     """
     return \
-        SwivelOutputPosition(x_input, x_mid, x_output, alpha_tilt, phi_input_yz, theta_mid) - \
-        SwivelOutputPosition(x_input, x_mid, 0, alpha_tilt, phi_input_yz, theta_mid)
+        SwivelOutputPosition(1, 1, 1, alpha_tilt, phi_input_yz, theta_mid) - \
+        SwivelOutputPosition(1, 1, 0, alpha_tilt, phi_input_yz, theta_mid)
 
 
-def SwivelThrustVectorsList(x_input, x_mid, x_output, alpha_tilt, phi_input_yz_arr, theta_mid_arr):
+def SwivelThrustVectorsList(alpha_tilt, phi_input_yz_arr, theta_mid_arr):
     """Calculate thrust vectors of swivel outputs.
 
     . For array of InputTube YZ angles phi_input_yz_arr and corresponding array
       of MidTube angles theta_mid_arr.
     """
     tVectorList = []
-    [tVectorList.append(SwivelThrustVector(x_input, x_mid, x_output, alpha_tilt, phi_input_yz, theta_mid))
+    [tVectorList.append(SwivelThrustVector(alpha_tilt, phi_input_yz, theta_mid))
      for phi_input_yz, theta_mid in zip(phi_input_yz_arr, theta_mid_arr)]
     return tVectorList
 
 
-def SwivelThrustVector_Gonio(x_input, x_mid, x_output, alpha_tilt, phi_input_yz, theta_mid):
+def SwivelThrustVector_Gonio(alpha_tilt, phi_input_yz, theta_mid):
     """Calculate thrust vector of swivel output.
 
     . Uses gonio equations obtained from elaborating the matrices.
@@ -376,8 +378,8 @@ def SwivelThrustVector_Gonio(x_input, x_mid, x_output, alpha_tilt, phi_input_yz,
       same thrust vector.
     """
     return \
-        SwivelOutputPosition_Gonio(x_input, x_mid, x_output, alpha_tilt, phi_input_yz, theta_mid) - \
-        SwivelOutputPosition_Gonio(x_input, x_mid, 0, alpha_tilt, phi_input_yz, theta_mid)
+        SwivelOutputPosition_Gonio(1, 1, 1, alpha_tilt, phi_input_yz, theta_mid) - \
+        SwivelOutputPosition_Gonio(1, 1, 0, alpha_tilt, phi_input_yz, theta_mid)
 
 
 ################################################################################
@@ -419,7 +421,7 @@ def FindThetaMidForThetaOutputXr(theta_output_xr_request, theta_output_xr_resolu
         n_max = np.ceil(np.log2((theta_mid_hi - theta_mid_lo) / theta_output_xr_resolution))
         while n < n_max:
             theta_mid = (theta_mid_lo + theta_mid_hi) / 2
-            t_vector = SwivelThrustVector(1, 1, 1, alpha_tilt, 0, theta_mid)
+            t_vector = SwivelThrustVector(alpha_tilt, 0, theta_mid)
             theta_output_xr = la.fAngleXR(t_vector)
             if theta_output_xr > theta_output_xr_request + theta_output_xr_resolution:
                 theta_mid_hi = theta_mid
@@ -481,11 +483,9 @@ def rfft_bins_of_phi_output_yz_as_function_of_theta_mid(alpha_tilt, N=16):
     theta_mid_arr = np.linspace(0, N_degrees, N, endpoint=False)
 
     # Calculate exact phi_output_yz_arr
-    # . can use x_input = 1, x_mid = 1, x_output = 1, because swivel thrust
-    #   vector pointing direction is independent of swivel tube lengths.
     phi_output_yz_arr = np.zeros(N)
     for T in range(N):
-        t_vector = SwivelThrustVector(1, 1, 1, alpha_tilt, phi_input_yz_for_analysis, theta_mid_arr[T])
+        t_vector = SwivelThrustVector(alpha_tilt, phi_input_yz_for_analysis, theta_mid_arr[T])
         phi_output_yz_arr[T] = la.toAngle360(la.fAngleYZ(t_vector))
 
     # . replace phi_output_yz_arr[theta_mid = 0] = NaN, when OutputTube is
@@ -690,7 +690,7 @@ def rfft_bins_of_theta_output_xr_as_function_of_theta_mid(alpha_tilt, N=16):
     #   vector pointing direction is independent of swivel tube lengths.
     theta_output_xr_arr = np.zeros(N)
     for T in range(N):
-        t_vector = SwivelThrustVector(1, 1, 1, alpha_tilt, 0, theta_mid_arr[T])
+        t_vector = SwivelThrustVector(alpha_tilt, 0, theta_mid_arr[T])
         theta_output_xr_arr[T] = la.fAngleXR(t_vector)
 
     # Create sinus like signal from theta_output_arr and negated copy
@@ -817,7 +817,7 @@ def approximate_theta_mid_as_function_of_theta_output_xr(theta_output_xr_arr,
 
 
 ################################################################################
-# Test
+# Other
 
 def log_result(result):
     print('')
@@ -825,6 +825,19 @@ def log_result(result):
         print('PASSED')
     else:
         print('FAILED')
+
+
+def snr(requested_arr, error_arr):
+    """Signal to noise ratio (SNR) of requested values and error values.
+
+    . assume error_arr = requested_arr - result_arr
+    . SNR = power of requested_arr / power of error_arr, and 10 log10() to have
+            value in dB
+    """
+    if len(requested_arr) == len(error_arr):
+        return 10 * np.log10(np.sum(requested_arr**2) / np.sum(error_arr**2))
+    else:
+        return False
 
 
 ################################################################################
@@ -869,7 +882,7 @@ def _verify_position_vector():
 def _verify_thrust_vector():
     # . echo
     print('>>> Verify thrust vector:')
-    t_vector = SwivelThrustVector_Gonio(x_input, x_mid, x_output, alpha_tilt_gold,
+    t_vector = SwivelThrustVector_Gonio(alpha_tilt_gold,
                                         phi_input_yz_gold, theta_mid_gold)
     print('t_vector[0] = ', t_vector[0])
     print('t_vector[1] = ', t_vector[1])
@@ -882,16 +895,16 @@ def _verify_thrust_vector():
     print()
     # . verify
     result = True
-    if np.abs(t_vector[0] - 26.34950784642885) > la.f_eps or \
-       np.abs(t_vector[1] - -26.665070575911415) > la.f_eps or \
-       np.abs(t_vector[2] - -13.952686029315188) > la.f_eps or \
+    if np.abs(t_vector[0] - 0.6587376961607214) > la.f_eps or \
+       np.abs(t_vector[1] - -0.6666267643977856) > la.f_eps or \
+       np.abs(t_vector[2] - -0.34881715073287967) > la.f_eps or \
        np.abs(t_vector[3] - 0.0) > la.f_eps:
         print('Wrong t_vector')
         result = False
     if np.abs(la.fAngleYZ(t_vector) - -152.37886965244215) > la.f_eps:
         print('Wrong fAngleYZ(t_vector)')
         result = False
-    if np.abs(la.fAngleZX(t_vector) - 117.90227534520515) > la.f_eps:
+    if np.abs(la.fAngleZX(t_vector) - 117.90227534520513) > la.f_eps:
         print('Wrong fAngleZX(t_vector)')
         result = False
     if np.abs(la.fAngleXY(t_vector) - -45.341042022386276) > la.f_eps:
@@ -934,8 +947,8 @@ def _verify_phi_output_yz_and_theta_output_zx():
     # . Use arbitrary phi_input_yz and theta_mid
     phi_input_yz = 15  # = 0 for swivel movement in ZX plane
     theta_mid = 35
-    p_vector = SwivelOutputPosition(1, 1, 1, alpha_tilt, phi_input_yz, theta_mid)
-    t_vector = SwivelThrustVector(1, 1, 1, alpha_tilt, phi_input_yz, theta_mid)
+    p_vector = SwivelOutputPosition(x_input, x_mid, x_output, alpha_tilt, phi_input_yz, theta_mid)
+    t_vector = SwivelThrustVector(alpha_tilt, phi_input_yz, theta_mid)
 
     # . Determine phi_output_yz of the position vector and thrust vector
     #   The position vector and thrust vector should have same angle YZ around
@@ -960,7 +973,7 @@ def _verify_phi_output_yz_and_theta_output_zx():
     #   . t_zx_phi_output_yz == PhiOutputYzVertical('down'),
     #   . t_zx_theta_output_zx == t_theta_output_xr.
     t_zx_phi_input_yz = sa.PhiOutputYzVertical('down') + phi_input_yz - t_phi_output_yz
-    t_zx_vector = SwivelThrustVector(1, 1, 1, alpha_tilt, t_zx_phi_input_yz, theta_mid)
+    t_zx_vector = SwivelThrustVector(alpha_tilt, t_zx_phi_input_yz, theta_mid)
     t_zx_phi_output_yz = la.toAngle360(la.fAngleYZ(t_zx_vector))
     t_zx_theta_output_zx = la.fAngleZX(t_zx_vector)
 
@@ -1000,16 +1013,16 @@ def _verify_FindThetaMidForThetaOutputXr():
     result = True
     mid_tube_rotation = 'positive'
     theta_output_xr_resolution = 0.01
-    swivel_tilt_max = sa.SwivelTiltXrMax(alpha_tilt)
+    swivel_tilt_xr_max = sa.SwivelTiltXrMax(alpha_tilt)
     step_size = 5
-    nof_steps = np.round(swivel_tilt_max / step_size) + 1
+    nof_steps = np.round(swivel_tilt_xr_max / step_size) + 1
     nof_steps = nof_steps.astype(int)
-    theta_output_xr_arr = np.linspace(0, swivel_tilt_max, nof_steps)
+    theta_output_xr_arr = np.linspace(0, swivel_tilt_xr_max, nof_steps)
     print('theta_output_xr_request  theta_output_xr_result  theta_mid')
     for theta_output_xr_request in theta_output_xr_arr:
         theta_mid = FindThetaMidForThetaOutputXr(theta_output_xr_request, theta_output_xr_resolution,
                                                  alpha_tilt, mid_tube_rotation)
-        t_vector = SwivelThrustVector(1, 1, 1, alpha_tilt, 0, theta_mid)
+        t_vector = SwivelThrustVector(alpha_tilt, 0, theta_mid)
         theta_output_xr_result = la.fAngleXR(t_vector)
         print('                    %3.0f                 %7.3f    %7.3f' %
               (theta_output_xr_request, theta_output_xr_result, theta_mid))

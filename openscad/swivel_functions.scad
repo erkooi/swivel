@@ -268,17 +268,17 @@ function ThetaOutputZxVertical(output_tube_pointing) =
 // Position vector from origin to swivel output point
 //------------------------------------------------------------------------------
 // . equivalent calculations as done by module FormSwivel()
-function SwivelOutputPosition(x_input, x_mid, x_output, phi_input_yz, theta_mid, alpha_tilt) =
+function SwivelOutputPosition(x_input, x_mid, x_output, alpha_tilt, phi_input_yz, theta_mid) =
     fRot_yz(phi_input_yz - c_phi_input_yz_construction) *
     fTrans(x_input, 0, 0) * fRot_zx(alpha_tilt) * fRot_yz(theta_mid) * fRot_zx(-alpha_tilt) *
     fTrans(x_mid, 0, 0) * fRot_zx(-alpha_tilt) * fRot_yz(-theta_mid) * fRot_zx(alpha_tilt) * fTrans(x_output, 0, 0) *
     [0, 0, 0, 1];
 
 
-module echo_SwivelOutputPosition(phi_input_yz, theta_mid, alpha_tilt, position_vector) {
+module echo_SwivelOutputPosition(alpha_tilt, phi_input_yz, theta_mid, position_vector) {
+    echo(alpha_tilt = alpha_tilt);
     echo(phi_input_yz = phi_input_yz);
     echo(theta_mid = theta_mid);
-    echo(alpha_tilt = alpha_tilt);
     echo(SwivelOutputPosition = position_vector);
     echo(SwivelOutputPosition_angle_YZ = fAngleYZ(position_vector));
     echo(SwivelOutputPosition_angle_ZX = fAngleZX(position_vector));
@@ -290,7 +290,7 @@ module echo_SwivelOutputPosition(phi_input_yz, theta_mid, alpha_tilt, position_v
 
 // SwivelOutputPosition_Gonio = SwivelOutputPosition, but using gonio equations
 // . equivalent calculations as done by module FormSwivel_Gonio()
-function SwivelOutputPosition_Gonio(x_input, x_mid, x_output, phi_input_yz, theta_mid, alpha_tilt) =
+function SwivelOutputPosition_Gonio(x_input, x_mid, x_output, alpha_tilt, phi_input_yz, theta_mid) =
     //
     // Rx = 1 0  0    Ry = c 0 s    Rz = c -s 0
     //      0 c -s         0 1 0         s  c 0
@@ -450,14 +450,14 @@ function SwivelOutputPosition_Gonio(x_input, x_mid, x_output, phi_input_yz, thet
 // Thrust vector of swivel output tube
 // . thrust vector is difference vector of position vector for two swivels that
 //   have different OutputTube lengths.
-function SwivelThrustVector(x_input, x_mid, x_output, alpha_tilt, phi_input_yz, theta_mid) =
-    SwivelOutputPosition(x_input, x_mid, x_output, phi_input_yz, theta_mid, alpha_tilt) -
-    SwivelOutputPosition(x_input, x_mid,        0, phi_input_yz, theta_mid, alpha_tilt);
+function SwivelThrustVector(alpha_tilt, phi_input_yz, theta_mid) =
+    SwivelOutputPosition(1, 1, 1, alpha_tilt, phi_input_yz, theta_mid) -
+    SwivelOutputPosition(1, 1, 0, alpha_tilt, phi_input_yz, theta_mid);
 
-module echo_SwivelThrustVector(phi_input_yz, theta_mid, alpha_tilt, thrust_vector) {
+module echo_SwivelThrustVector(alpha_tilt, phi_input_yz, theta_mid, thrust_vector) {
+    echo(alpha_tilt = alpha_tilt);
     echo(phi_input_yz = phi_input_yz);
     echo(theta_mid = theta_mid);
-    echo(alpha_tilt = alpha_tilt);
     echo(SwivelThrustVector = thrust_vector);
     echo(SwivelThrustVector_angle_YZ = fAngleYZ(thrust_vector));
     echo(SwivelThrustVector_angle_ZX = fAngleZX(thrust_vector));
@@ -477,9 +477,9 @@ function DeterminePhiInputYzForPhiOutputYzAndThetaMid(x_input, x_mid, x_output, 
     // First determine the phi_output_yz angle of the OutputTube due to
     // theta_mid using phi_input_yz = 0. Then adjust phi_input_yz such that
     // phi_input_yz + phi_output_yz yields phi_output_yz_request.
-    let(position_vector = SwivelOutputPosition(x_input, x_mid, x_output,
+    let(position_vector = SwivelOutputPosition(x_input, x_mid, x_output, alpha_tilt,
                                                0,
-                                               theta_mid, alpha_tilt),
+                                               theta_mid),
         phi_output_yz = fAngleYZ(position_vector),
         phi_input_yz = phi_output_yz_request - phi_output_yz
     )
@@ -518,7 +518,7 @@ function rDftBinsOfPhiOutputYzAsFunctionOfThetaMid(alpha_tilt,
         // Calculate exact phi_output_yz_arr
         // . can use x_input = 1, x_mid = 1, x_output = 1, because swivel thrust
         //   vector pointing direction is independent of swivel tube lengths.
-        thrust_vector_arr = [ for (n = n_arr) SwivelThrustVector(1, 1, 1, alpha_tilt,
+        thrust_vector_arr = [ for (n = n_arr) SwivelThrustVector(alpha_tilt,
                                                                  phi_input_yz_for_analysis,
                                                                  theta_mid_arr[n]) ],
         phi_output_yz_arr = [ for (n = n_arr) toAngle360(fAngleYZ(thrust_vector_arr[n])) ],
@@ -620,7 +620,7 @@ function rDftBinsOfThetaOutputXrAsFunctionOfThetaMid(alpha_tilt,
         // Calculate exact theta_output_xr_arr
         // . can use x_input = 1, x_mid = 1, x_output = 1, because swivel thrust
         //   vector pointing direction is independent of swivel tube lengths.
-        thrust_vector_arr = [ for (n = n_arr) SwivelThrustVector(1, 1, 1, alpha_tilt,
+        thrust_vector_arr = [ for (n = n_arr) SwivelThrustVector(alpha_tilt,
                                                                  0, theta_mid_arr[n]) ],
         theta_output_xr_arr = [ for (n = n_arr) toAngle360(fAngleXR(thrust_vector_arr[n])) ],
 

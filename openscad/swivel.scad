@@ -81,7 +81,7 @@ use <swivel_assembly.scad>;
 //   8   FormSwivel() animate OutputTube sweep out and back several times, while rotating one time,
 //                    to create a star pattern
 //   9   Trial
-select_model = 8;
+select_model = 4;
 
 // select_orientation
 //       output_tube_pointing  mid_tube_rotation
@@ -226,17 +226,19 @@ if (select_model == 0) {
 
     if (verbosity > 0) {
         // Echo swivel status
-        position_vector = SwivelOutputPosition(x_input, x_mid, x_output,
+        position_vector = SwivelOutputPosition(x_input, x_mid, x_output, alpha_tilt,
                                                phi_input_yz,
-                                               theta_mid, alpha_tilt);
-        echo_SwivelOutputPosition(phi_input_yz,
-                                  theta_mid, alpha_tilt,
+                                               theta_mid);
+        echo_SwivelOutputPosition(alpha_tilt,
+                                  phi_input_yz,
+                                  theta_mid,
                                   position_vector);
 
-        thrust_vector = SwivelThrustVector(x_input, x_mid, x_output, alpha_tilt,
+        thrust_vector = SwivelThrustVector(alpha_tilt,
                                            phi_input_yz, theta_mid);
-        echo_SwivelThrustVector(phi_input_yz,
-                                theta_mid, alpha_tilt,
+        echo_SwivelThrustVector(alpha_tilt,
+                                phi_input_yz,
+                                theta_mid,
                                 thrust_vector);
     }
 
@@ -262,9 +264,9 @@ if (select_model == 0) {
 
     if (verbosity > 0) {
         // Echo swivel status
-        phi_output_yz = toAngle360(fAngleYZ(SwivelOutputPosition(x_input, x_mid, x_output,
+        phi_output_yz = toAngle360(fAngleYZ(SwivelOutputPosition(x_input, x_mid, x_output, alpha_tilt,
                                                                  phi_input_yz_for_input_marker_up,
-                                                                 theta_mid, alpha_tilt)));
+                                                                 theta_mid)));
         echo(time = $t);
         echo(theta_mid = theta_mid);
         echo(phi_output_yz = phi_output_yz);
@@ -286,11 +288,12 @@ if (select_model == 0) {
 
     if (verbosity > 0) {
         // Echo swivel status
-        position_vector_with_input_marker_up = SwivelOutputPosition(x_input, x_mid, x_output,
+        position_vector_with_input_marker_up = SwivelOutputPosition(x_input, x_mid, x_output, alpha_tilt,
                                                                     phi_input_yz_for_input_marker_up,
-                                                                    theta_mid, alpha_tilt);
-        echo_SwivelOutputPosition(phi_input_yz_for_input_marker_up,
-                                  theta_mid, alpha_tilt,
+                                                                    theta_mid);
+        echo_SwivelOutputPosition(alpha_tilt,
+                                  phi_input_yz_for_input_marker_up,
+                                  theta_mid,
                                   position_vector_with_input_marker_up);
 
         echo(theta_mid = theta_mid);
@@ -298,10 +301,10 @@ if (select_model == 0) {
         echo(phi_output_yz = phi_output_yz);
 
         // Verify swivel status
-        position_vector = SwivelOutputPosition(x_input, x_mid, x_output,
+        position_vector = SwivelOutputPosition(x_input, x_mid, x_output, alpha_tilt,
                                                phi_input_yz,
-                                               theta_mid, alpha_tilt);
-        thrust_vector = SwivelThrustVector(x_input, x_mid, x_output, alpha_tilt,
+                                               theta_mid);
+        thrust_vector = SwivelThrustVector(alpha_tilt,
                                            phi_input_yz, theta_mid);
 
         position_angle_YZ = toAngle360(fAngleYZ(position_vector));
@@ -450,17 +453,17 @@ if (select_model == 0) {
 
     if (verbosity > 0) {
         // Verify swivel status
-        thrust_vector = SwivelThrustVector(x_input, x_mid, x_output, alpha_tilt,
+        thrust_vector = SwivelThrustVector(alpha_tilt,
                                            hover_phi_input_yz, hover_theta_mid);
 
         // pitch
         hover_pitch_theta_output_zx = fAngleZX(thrust_vector);
-        hover_pitch = hover_pitch_theta_output_zx - theta_output_zx_vertical;
+        hover_pitch = toAngle180(hover_pitch_theta_output_zx - theta_output_zx_vertical);
         hover_pitch_error = toAngle180(pitch - hover_pitch);
 
         // yaw
         hover_yaw_phi_output_yz = fAngleYZ(thrust_vector);
-        hover_yaw = hover_yaw_phi_output_yz - phi_output_yz_vertical;
+        hover_yaw = toAngle180(hover_yaw_phi_output_yz - phi_output_yz_vertical);
         hover_yaw_error = toAngle180(yaw - hover_yaw);
 
         echo(hover_theta_mid = hover_theta_mid);
@@ -509,7 +512,7 @@ if (select_model == 0) {
 
     if (verbosity > 0) {
         // Verify swivel status
-        thrust_vector = SwivelThrustVector(x_input, x_mid, x_output, alpha_tilt,
+        thrust_vector = SwivelThrustVector(alpha_tilt,
                                            transition_phi_input_yz, transition_theta_mid);
 
         // pitch
@@ -548,10 +551,10 @@ if (select_model == 0) {
 
             if (verbosity > 0) {
                 // Verify that position_angle_yz == thrust_angle_yz == phi_output360
-                position_vector = SwivelOutputPosition(x_input, x_mid, x_output,
+                position_vector = SwivelOutputPosition(x_input, x_mid, x_output, alpha_tilt,
                                                        phi_input_yz,
-                                                       theta_mid, alpha_tilt);
-                thrust_vector = SwivelThrustVector(x_input, x_mid, x_output, alpha_tilt,
+                                                       theta_mid);
+                thrust_vector = SwivelThrustVector(alpha_tilt,
                                                    phi_input_yz, theta_mid);
 
                 // Map position_vector YZ angle and thrust_vector YZ angle to range [0, 360> of phi_output_yz
@@ -639,7 +642,7 @@ if (select_model == 0) {
     phi_input_yz_star = phi_input_yz + phi_input_yz_offset;
 
     if (verbosity > 0) {
-        thrust_vector = SwivelThrustVector(x_input, x_mid, x_output, alpha_tilt,
+        thrust_vector = SwivelThrustVector(alpha_tilt,
                                            phi_input_yz_star, theta_mid);
         thrust_angle_xr = fAngleXR(thrust_vector);
 

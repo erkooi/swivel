@@ -41,19 +41,15 @@ alpha_tilt = 25;
 //------------------------------------------------------------------------------
 // Echo position_vector
 //------------------------------------------------------------------------------
-position_vector = SwivelOutputPosition_Gonio(x_input, x_mid, x_output, phi_input_yz, theta_mid, alpha_tilt);
-echo_SwivelOutputPosition(phi_input_yz, theta_mid, alpha_tilt, position_vector);
+position_vector = SwivelOutputPosition_Gonio(x_input, x_mid, x_output, alpha_tilt, phi_input_yz, theta_mid);
+echo_SwivelOutputPosition(alpha_tilt, phi_input_yz, theta_mid, position_vector);
 
 
 //------------------------------------------------------------------------------
 // Echo thrust_vector
 //------------------------------------------------------------------------------
-thrust_vector = SwivelThrustVector(x_input, x_mid, x_output, phi_input_yz, theta_mid, alpha_tilt);
-thrust_vector_111 = SwivelThrustVector(1, 1, 1, phi_input_yz, theta_mid, alpha_tilt);
+thrust_vector = SwivelThrustVector(alpha_tilt, phi_input_yz, theta_mid);
 echo(thrust_vector = thrust_vector);
-echo_SwivelThrustVector(phi_input_yz, theta_mid, alpha_tilt, thrust_vector);
-echo(thrust_vector_111 = thrust_vector_111);
-echo_SwivelThrustVector(phi_input_yz, theta_mid, alpha_tilt, thrust_vector_111);
 
 
 //------------------------------------------------------------------------------
@@ -63,8 +59,8 @@ echo("Verify SwivelOutputPosition_Gonio() == SwivelOutputPosition()");
 step = 30;
 for (theta_mid = [0:step:360]) {
     for (phi_input_yz = [0:step:360]) {
-        position_vector       = SwivelOutputPosition(      x_input, x_mid, x_output, phi_input_yz, theta_mid, alpha_tilt);
-        position_vector_gonio = SwivelOutputPosition_Gonio(x_input, x_mid, x_output, phi_input_yz, theta_mid, alpha_tilt);
+        position_vector       = SwivelOutputPosition(      x_input, x_mid, x_output, alpha_tilt, phi_input_yz, theta_mid);
+        position_vector_gonio = SwivelOutputPosition_Gonio(x_input, x_mid, x_output, alpha_tilt, phi_input_yz, theta_mid);
 
         assert(abs(position_vector[0] - position_vector_gonio[0]) < f_eps, "position_vector.x != position_vector_gonio.x");
         assert(abs(position_vector[1] - position_vector_gonio[1]) < f_eps, "position_vector.y != position_vector_gonio.y");
