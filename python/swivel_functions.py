@@ -626,11 +626,9 @@ def log_and_verify_input_tube_control_near_horizontal(f1_phi_output_yz_ampl=0):
     print('sa.phi_output_yz_for_analysis =', sa.phi_output_yz_for_analysis)
     print('f1_phi_output_yz_ampl =', f1_phi_output_yz_ampl)
     print('')
-    print('swivel                                                          ')
-    print('output    mid_tube               phi_input_yz   phi_output_yz   phi_input_yz'
-          '                  f1_phi_output_yz_ampl *')
-    print('pointing  rotation    theta_mid  control        vertical        for_analysis'
-          '    theta_mid/2   sin(theta_mid)')
+    print('swivel                           phi       phi        phi                        f1_phi')
+    print('output    mid_tube               input_yz  output_yz  input_yz                   output_yz_ampl *')
+    print('pointing  rotation    theta_mid  control   vertical   for_analysis  theta_mid/2  sin(theta_mid)')
     result = True
     for pointing, sign in sa.control_orientations:
         phi_input_yz_horizontal = sa.InitPhiInputYzHorizontal(pointing, sign)
@@ -648,7 +646,7 @@ def log_and_verify_input_tube_control_near_horizontal(f1_phi_output_yz_ampl=0):
         approximate_phi_output_yz_theta_mid = approximate_phi_output_yz_theta_mid_arr[0]
         phi_input_yz_control = la.toAngle360(np.round(phi_output_yz_vertical - approximate_phi_output_yz_theta_mid))
         # Log InputTube YZ control near theta_mid = 0 for vertical swivel OutputTube YZ
-        print('  %-8s  %-8s:  %8s  %6.f       = %5.f         + %6.f        - %7.f     + %4.f' %
+        print('  %-8s  %-8s:  %8s  %6.f  = %5.f    + %6.f      - %7.f    + %4.f' %
               (pointing, sign,
                theta_mid_str,
                phi_input_yz_control,

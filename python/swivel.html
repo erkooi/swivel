@@ -14435,11 +14435,19 @@ a.anchor-link {
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Model selections</span>
-<span class="c1"># . Set True to enable first harmonic in approximation from real DFT of exact function</span>
-<span class="n">use_f1_phi_output_yz_ampl</span> <span class="o">=</span> <span class="kc">True</span>
-<span class="n">use_f1_theta_output_xr_ampl</span> <span class="o">=</span> <span class="kc">True</span>
 
-<span class="c1"># . Uncomment to select control option</span>
+<span class="c1"># Select YZ approximation</span>
+<span class="c1"># . 0 = default use f1_phi_output_yz_ampl from real DFT of exact function</span>
+<span class="c1"># . 1 = set f1_phi_output_yz_ampl = 0</span>
+<span class="n">sel_f1_phi_output_yz_ampl</span> <span class="o">=</span> <span class="mi">0</span>
+
+<span class="c1"># Select XR approximation</span>
+<span class="c1"># . 0 = default use sel_f1_theta_output_xr_ampl from real DFT of exact function</span>
+<span class="c1"># . 1 = set sel_f1_theta_output_xr_ampl = sa.swivel_tilt_xr_max</span>
+<span class="c1"># . 2 = use mean of option 0 and 1 as compromise</span>
+<span class="n">sel_f1_theta_output_xr_ampl</span> <span class="o">=</span> <span class="mi">0</span>
+
+<span class="c1"># Uncomment to select control option</span>
 <span class="n">output_tube_pointing</span> <span class="o">=</span> <span class="s1">&#39;down&#39;</span><span class="p">;</span> <span class="n">mid_tube_rotation</span> <span class="o">=</span> <span class="s1">&#39;positive&#39;</span>
 <span class="c1">#output_tube_pointing = &#39;down&#39;; mid_tube_rotation = &#39;negative&#39;</span>
 <span class="c1">#output_tube_pointing = &#39;up&#39;; mid_tube_rotation = &#39;positive&#39;</span>
@@ -14515,8 +14523,8 @@ angle_yz_resolution        = 0.200
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Approximation accuracy:&#39;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;. use_f1_phi_output_yz_ampl   = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">use_f1_phi_output_yz_ampl</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;. use_f1_theta_output_xr_ampl = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">use_f1_theta_output_xr_ampl</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;. sel_f1_phi_output_yz_ampl   = </span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">sel_f1_phi_output_yz_ampl</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;. sel_f1_theta_output_xr_ampl = </span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">sel_f1_theta_output_xr_ampl</span><span class="p">)</span>
 </pre></div>
 
      </div>
@@ -14537,8 +14545,8 @@ angle_yz_resolution        = 0.200
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
 <pre>Approximation accuracy:
-. use_f1_phi_output_yz_ampl   = True
-. use_f1_theta_output_xr_ampl = True
+. sel_f1_phi_output_yz_ampl   = 0
+. sel_f1_theta_output_xr_ampl = 0
 </pre>
 </div>
 </div>
@@ -14743,7 +14751,7 @@ np.isnan(phi_output_yz_analysis_arr) =  [ True False False ... False False False
 <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;phi_output_yz_analysis angle&#39;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
 <span class="c1"># save figure: phi_output_yz(theta_mid)</span>
-<span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="s2">&quot;../Pictures/phi_output_yz_as_function_of_theta_mid.jpg&quot;</span><span class="p">)</span>
+<span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="s2">&quot;../pictures/phi_output_yz_as_function_of_theta_mid.jpg&quot;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
 </pre></div>
 
@@ -14781,7 +14789,7 @@ np.isnan(phi_output_yz_analysis_arr) =  [ True False False ... False False False
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <p><strong>Discontinuity in OutputTube YZ angle when MidTube angle is 0:</strong></p>
-<p>The swivel OutputTube YZ angle jumps between 0 and 180 when the MidTube angle is +0 and -0. With a real swivel this is barely noticable, because the swivel is straight when the MidTube angle is 0, so then the OutputTube YZ angle is actually undefined. Therefore replace theta_mid = 0 by +c_theta_mid_eps (~= +0) when mid_tube_rotation is positive, else by 360 - c_theta_mid_eps (~= -0) when mid_tube_rotation is negative.</p>
+<p>The swivel OutputTube YZ angle jumps between 0 and 180 when the MidTube angle is +0 and -0. With a real swivel this is barely noticable, because the swivel is straight when the MidTube angle is 0, so then the OutputTube YZ angle is actually undefined. Therefore replace theta_mid = +0 by +c_theta_mid_eps when mid_tube_rotation is positive, else by 360 - c_theta_mid_eps (= -0) when mid_tube_rotation is negative.</p>
 <p><strong>Rotate MidTube 180 degrees:</strong></p>
 <p>A MidTube rotation range of 180 degrees is sufficient to control the swivel tilt. Rotate the MidTube from 0 to 180 degrees to point the swivel from straight to maximum tilted. Rotate the MidTube back from 180 to 0 to point the swivel from maximum tilted back to horizontal.</p>
 <p><strong>Continuously rotating MidTube:</strong></p>
@@ -15137,12 +15145,14 @@ fi = 1 : ampl = 2.8160029627, angle =   90.0
 <span class="c1"># Determine harmonics in exact phi_output_yz(theta_mid)</span>
 <span class="n">rfft_phi_output_yz_diff_ampl_arr</span><span class="p">,</span> <span class="n">rfft_phi_output_yz_diff_angle_arr</span> <span class="o">=</span> \
     <span class="n">sw</span><span class="o">.</span><span class="n">rfft_bins_of_phi_output_yz_as_function_of_theta_mid</span><span class="p">(</span><span class="n">alpha_tilt</span><span class="p">,</span> <span class="n">N_points</span><span class="p">)</span>
-<span class="k">if</span> <span class="n">use_f1_phi_output_yz_ampl</span><span class="p">:</span>
+<span class="c1"># Select f1_phi_output_yz_ampl</span>
+<span class="k">if</span> <span class="n">sel_f1_phi_output_yz_ampl</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
     <span class="c1"># Default use first harmonic in crosstalk approximation</span>
     <span class="n">f1_phi_output_yz_ampl</span> <span class="o">=</span> <span class="n">rfft_phi_output_yz_diff_ampl_arr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 <span class="k">else</span><span class="p">:</span>
     <span class="c1"># Optionally only use the linear theta_mid / 2 term, see SNR to see effect</span>
     <span class="n">f1_phi_output_yz_ampl</span> <span class="o">=</span> <span class="mi">0</span>
+
 <span class="n">phi_output_yz_crosstalk_arr</span> <span class="o">=</span> <span class="n">sw</span><span class="o">.</span><span class="n">approximate_phi_output_yz_crosstalk</span><span class="p">(</span><span class="n">theta_mid_360_arr</span><span class="p">,</span>
                                                                      <span class="n">f1_phi_output_yz_ampl</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;phi_output_yz_analysis_arr =&#39;</span><span class="p">,</span> <span class="n">phi_output_yz_analysis_arr</span><span class="p">)</span>
@@ -15267,13 +15277,13 @@ sa.phi_input_yz_for_analysis = 270
 sa.phi_output_yz_for_analysis = 0
 f1_phi_output_yz_ampl = 2.816002962662007
 
-swivel                                                          
-output    mid_tube               phi_input_yz   phi_output_yz   phi_input_yz                  f1_phi_output_yz_ampl *
-pointing  rotation    theta_mid  control        vertical        for_analysis    theta_mid/2   sin(theta_mid)
-  down      positive:        +0     180       =   270         +    270        -       0     +    0
-  down      negative:        -0       0       =   270         +    270        -     180     +   -0
-  up        positive:        +0       0       =    90         +    270        -       0     +    0
-  up        negative:        -0     180       =    90         +    270        -     180     +   -0
+swivel                           phi       phi        phi                        f1_phi
+output    mid_tube               input_yz  output_yz  input_yz                   output_yz_ampl *
+pointing  rotation    theta_mid  control   vertical   for_analysis  theta_mid/2  sin(theta_mid)
+  down      positive:        +0     180  =   270    +    270      -       0    +    0
+  down      negative:        -0       0  =   270    +    270      -     180    +   -0
+  up        positive:        +0       0  =    90    +    270      -       0    +    0
+  up        negative:        -0     180  =    90    +    270      -     180    +   -0
 
 
 PASSED
@@ -15288,7 +15298,8 @@ PASSED
 </div>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h2 id="3.3-Conclusion:-Approximate-InputTube-YZ-angle-control">3.3 <strong>Conclusion: Approximate InputTube YZ angle control</strong><a class="anchor-link" href="#3.3-Conclusion:-Approximate-InputTube-YZ-angle-control">&#182;</a></h2><p>Approximate swivel InputTube YZ angle phi_input_yz_control, as function OutputTube YZ angle phi_output_yz_request, and MidTube angle theta_mid:</p>
+<h2 id="3.3-Conclusion:-Approximate-InputTube-YZ-angle-control">3.3 <strong>Conclusion: Approximate InputTube YZ angle control</strong><a class="anchor-link" href="#3.3-Conclusion:-Approximate-InputTube-YZ-angle-control">&#182;</a></h2><p>Approximate swivel InputTube YZ angle phi_input_yz_control, as function OutputTube YZ
+angle phi_output_yz_request, and MidTube angle theta_mid:</p>
 
 <pre><code>phi_input_yz_control = phi_output_yz_request - phi_output_yz_approx(theta_mid)
 
@@ -15298,8 +15309,9 @@ where:
         with:
         . phi_input_yz_for_analysis = -90
         . theta_mid in [0 : 360&gt;
-        . f1_phi_output_yz_ampl = first harmonic from DFT of harmonic part in exact phi_output_yz(theta_mid),
-          few degrees, approximates the small deviation from linear crosstalk,</code></pre>
+        . f1_phi_output_yz_ampl = first harmonic from DFT of harmonic part in exact
+          phi_output_yz(theta_mid), few degrees, approximates the small deviation from
+          linear crosstalk,</code></pre>
 
 </div>
 </div>
@@ -15329,7 +15341,7 @@ where:
 <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;theta_output_xr angle&#39;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
 <span class="c1"># save figure: theta_output_xr(theta_mid)</span>
-<span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="s2">&quot;../Pictures/theta_output_xr_as_function_of_theta_mid.jpg&quot;</span><span class="p">)</span>
+<span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="s2">&quot;../pictures/theta_output_xr_as_function_of_theta_mid.jpg&quot;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
 
 <span class="c1"># Expect theta_output_xr in range 0 to 90 + 4 * alpha_tilt</span>
@@ -15634,15 +15646,20 @@ fi =  1 : ampl = 99.17936, angle =  -90.0
 <span class="c1"># Determine harmonics in exact theta_output_xr(theta_mid)</span>
 <span class="n">rfft_theta_output_xr_ampl_arr</span><span class="p">,</span> <span class="n">rfft_theta_output_xr_angle_arr</span> <span class="o">=</span> \
     <span class="n">sw</span><span class="o">.</span><span class="n">rfft_bins_of_theta_output_xr_as_function_of_theta_mid</span><span class="p">(</span><span class="n">alpha_tilt</span><span class="p">,</span> <span class="n">N_points</span><span class="p">)</span>
-<span class="k">if</span> <span class="n">use_f1_theta_output_xr_ampl</span><span class="p">:</span>
+<span class="c1"># Select f1_theta_output_xr_ampl</span>
+<span class="k">if</span> <span class="n">sel_f1_theta_output_xr_ampl</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
     <span class="c1"># Default use first harmonic term rfft_theta_output_xr_ampl_arr[1] ~= swivel_tilt_xr_max,</span>
     <span class="c1"># but &lt; swivel_tilt_xr_max due to small third harmonic term</span>
     <span class="n">f1_theta_output_xr_ampl</span> <span class="o">=</span> <span class="n">rfft_theta_output_xr_ampl_arr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-<span class="k">else</span><span class="p">:</span>
+<span class="k">elif</span> <span class="n">sel_f1_theta_output_xr_ampl</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
     <span class="c1"># Optionally use swivel_tilt_xr_max instead, to have zero error at maximum tilt XR angle</span>
     <span class="c1"># (so when MidTube theta_mid = 180), but somewhat larger error on average as follows from</span>
     <span class="c1"># SNR (see transition application).</span>
     <span class="n">f1_theta_output_xr_ampl</span> <span class="o">=</span> <span class="n">sa</span><span class="o">.</span><span class="n">swivel_tilt_xr_max</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="c1"># Mean of select 0 and 1 as compromise</span>
+    <span class="n">f1_theta_output_xr_ampl</span> <span class="o">=</span> <span class="p">(</span><span class="n">rfft_theta_output_xr_ampl_arr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">sa</span><span class="o">.</span><span class="n">swivel_tilt_xr_max</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+
 <span class="n">theta_output_xr_approx_arr</span> <span class="o">=</span> <span class="n">sw</span><span class="o">.</span><span class="n">approximate_theta_output_xr_as_function_of_theta_mid</span><span class="p">(</span><span class="n">theta_mid_360_arr</span><span class="p">,</span>
                                                                                      <span class="n">f1_theta_output_xr_ampl</span><span class="p">)</span>
 </pre></div>
@@ -15735,15 +15752,17 @@ approximate_theta_output_xr_as_function_of_theta_mid()
 <pre><code>theta_output_xr ~= f1_theta_output_xr_ampl * abs(sin(theta_mid / 2))
 
     with:
-    . f1_theta_output_xr_ampl ~= swivel_tilt_xr_max, first harmonic from rDFT of exact theta_output_xr(theta_mid).
-    . theta_output_xr in [0:180] for theta_mid in [0 : 360&gt;, so sin(theta_mid) &gt;= 0, or for all theta_mid using
-      abs(sin(theta_mid)).</code></pre>
+    . f1_theta_output_xr_ampl ~= swivel_tilt_xr_max, first harmonic from rDFT of
+      exact theta_output_xr(theta_mid).
+    . theta_output_xr in [0:180] for theta_mid in [0 : 360&gt;, so sin(theta_mid) &gt;= 0,
+      or for all theta_mid using abs(sin(theta_mid)).</code></pre>
 <h3 id="4.2.2-Inverse-function:-theta_mid(theta_output_xr)">4.2.2 Inverse function: theta_mid(theta_output_xr)<a class="anchor-link" href="#4.2.2-Inverse-function:-theta_mid(theta_output_xr)">&#182;</a></h3><p>Approximate MidTube angle theta_mid as function of swivel OutputTube XR angle theta_output_xr:</p>
 
 <pre><code>theta_mid ~= 2 * arcsin(fraction)
 
     with:
-    . f1_theta_output_xr_ampl ~= swivel_tilt_xr_max, first harmonic from rDFT of exact theta_output_xr(theta_mid).
+    . f1_theta_output_xr_ampl ~= swivel_tilt_xr_max, first harmonic from rDFT of
+      exact theta_output_xr(theta_mid).
     . fraction = theta_output_xr / f1_theta_output_xr_ampl
       fraction = 1 if fraction &gt; 1 (so theta_output_xr &gt; f1_theta_output_xr_ampl)
       fraction in [0:1], because theta_output_xr &gt;= 0
