@@ -448,11 +448,16 @@ function SwivelOutputPosition_Gonio(x_input, x_mid, x_output, alpha_tilt, phi_in
 //------------------------------------------------------------------------------
 
 // Thrust vector of swivel output tube
-// . thrust vector is difference vector of position vector for two swivels that
-//   have different OutputTube lengths.
+// . Thrust vector is difference vector of position vector for two swivels that
+//   have different OutputTube lengths. The thrust vector does not depend on
+//   the swivel size, only on the alpha_tilt angle. Therefor choose thrust
+//   vector between [x_input, x_mid, x_output] = [0, 0, 1] and [0, 0, 0] so
+//   that the thrust vector calculation reduces to calculating the OutputTube
+//   position for [0, 0, 1]. The x_output must be > 0, but the thrust vector
+//   pointing does not depended on the size of x_output, therefor choose
+//   x_output = 1.
 function SwivelThrustVector(alpha_tilt, phi_input_yz, theta_mid) =
-    SwivelOutputPosition(1, 1, 1, alpha_tilt, phi_input_yz, theta_mid) -
-    SwivelOutputPosition(1, 1, 0, alpha_tilt, phi_input_yz, theta_mid);
+    SwivelOutputPosition(0, 0, 1, alpha_tilt, phi_input_yz, theta_mid);
 
 module echo_SwivelThrustVector(alpha_tilt, phi_input_yz, theta_mid, thrust_vector) {
     echo(alpha_tilt = alpha_tilt);
@@ -481,7 +486,7 @@ function DeterminePhiInputYzForPhiOutputYzAndThetaMid(x_input, x_mid, x_output, 
                                                0,
                                                theta_mid),
         phi_output_yz = fAngleYZ(position_vector),
-        phi_input_yz = phi_output_yz_request - phi_output_yz
+        phi_input_yz = toAngle360(phi_output_yz_request - phi_output_yz)
     )
     phi_input_yz;
 

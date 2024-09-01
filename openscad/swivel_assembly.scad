@@ -78,3 +78,18 @@ module FormSwivel_Gonio(x_input, x_mid, x_output, R_wall_inner, d_wall, alpha_ti
     }
 }
 
+
+// Create difference of FormSwivel using transfomations and using 4D matrices
+// Should result in no object, because FormSwivel() = FormSwivel_Gonio()
+module DiffSwivel(x_input, x_mid, x_output, R_wall_inner, d_wall, alpha_tilt,
+                  use_bottom, R_bottom_hole, L_marker, d_marker, h_marker,
+                  phi_input_yz, theta_mid) {
+    difference() {
+        FormSwivel(x_input, x_mid, x_output, R_wall_inner, d_wall, alpha_tilt,
+                   use_bottom, R_bottom_hole, L_marker, d_marker, h_marker,
+                   phi_input_yz, theta_mid);
+        FormSwivel_Gonio(x_input, x_mid, x_output, R_wall_inner, d_wall, alpha_tilt,
+                         use_bottom, R_bottom_hole, L_marker, d_marker, h_marker,
+                         phi_input_yz, theta_mid);
+    }
+}

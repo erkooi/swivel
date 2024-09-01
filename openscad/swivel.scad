@@ -71,17 +71,25 @@ use <swivel_assembly.scad>;
 //                    and to phi_output_yz_vertical_up
 //
 //   4   Formswivel() animate OutputTube hovering around phi_output_yz_vertical_down, using rDFT and
-//                    harmonics approximation, as in swivel.ipynb
-//   5   Formswivel() animate OutputTube transition between horizontal and phi_output_yz_vertical_down as 3.1,
-//                    but using rDFT and harmonics approximation, as in swivel.ipynb
+//                    harmonics approximation, hover circle as in swivel.ipynb
+//   4.1 Formswivel() animate OutputTube hovering around phi_output_yz_vertical_down, using rDFT and
+//                    harmonics approximation, hover star pattern (similar as with 8) to show that
+//                    thrust vectoring during hover is possible, because the InputTube YZ angle and
+//                    MidTube angle control is without jumps.
+//   5   Formswivel() animate OutputTube transition between horizontal and phi_output_yz_vertical_down
+//                    as 3.1, but using rDFT and harmonics approximation, transition as in swivel.ipynb
 //
 //   6   FormSwivel() show multiple swivel pointings in one view
+//   6.1 DiffSwivel() shows no swivels, verifies DiffSwivel() = FormSwivel - FormSwivel_gonio() == NULL
+//
 //   7   FormSwivel() animate OutputTube sweep out and back one time, while rotating several times,
 //                    to create a spiral pattern
-//   8   FormSwivel() animate OutputTube sweep out and back several times, while rotating one time,
-//                    to create a star pattern
+//   8   FormSwivel() animate OutputTube sweep out and back nof_star_points times, while rotating
+//                    one time, to create a star pattern, to show that thrust vectoring during
+//                    forward flight with near straight swivel is not possible, because it requires
+//                    jumps in the control of the InputTube YZ angle.
 //   9   Trial
-select_model = 4;
+select_model = 3.1;
 
 // select_orientation
 //       output_tube_pointing  mid_tube_rotation
@@ -90,6 +98,13 @@ select_model = 4;
 //   2     "up"                  "positive"
 //   3     "up"                  "negative"
 select_orientation = 0;
+
+// Segment slope angle
+alpha_tilt = 25;
+
+// Number of star points in star form control pattern
+nof_star_points = 4;
+
 
 //------------------------------------------------------------------------------
 // Verbosity
@@ -112,7 +127,6 @@ if (verbosity > 1) {
 // Swivel tube segment
 R_wall_inner = 45;   // Tube inner radius
 d_wall = 4;          // Tube wall thickness
-alpha_tilt = 25;     // Segment slope angle
 x_input = 50;        // Length of input segment
 x_mid = 80;          // Length of middle segment
 x_output = 40;       // Length of output segment
@@ -474,8 +488,86 @@ if (select_model == 0) {
              hover_yaw_error = hover_yaw_error);
 
         // verify
-        assert(abs(hover_pitch_error) < 1.0, "Too large hover pitch error.");
-        assert(abs(hover_yaw_error) < 0.1, "Too large hover yaw error.");
+        // . tune error margin somewhat as function of alpha_tilt
+        pitch_margin = alpha_tilt <= 25 ? 1.0 : 1.5;
+        yaw_margin = alpha_tilt <= 25 ? 0.1 : 0.15;
+        assert(abs(hover_pitch_error) < pitch_margin, "Too large hover pitch error.");
+        assert(abs(hover_yaw_error) < yaw_margin, "Too large hover yaw error.");
+    }
+
+} else if (select_model == 4.1) {
+    // Use first harmonic approximations
+    echo(phi_output_yz_f1_ampl = phi_output_yz_f1_ampl);
+    echo(theta_output_xr_f1_ampl = theta_output_xr_f1_ampl);
+
+    // Animate OutputTube hovering around phi_output_yz_vertical_down with
+    // psi_hover XY angle making a circle. The star has nof_star_points per
+    // circle and maximum deviation of hover_ampl at the points of the star.
+    hover_ampl = theta_output_xr_f1_ampl - swivel_tilt_xr_vertical;
+    // . timeline
+    tp = nof_star_points * $t;  // tp time has increased by 1 per pointing
+    ti = floor(tp);  // ti pointing index in range 0 to nof_star_points - 1
+    sawtooth_up = 2 * (tp % 1);  // one sawtooth up per pointing
+    sawtooth_down = 2 - sawtooth_up;  // one sawtooth down per pointing
+    triangle = (tp % 1) < 0.5 ? sawtooth_up : sawtooth_down;
+    hover_deviation = triangle * hover_ampl;  // move along star point
+    psi_hover = ti * 360 / nof_star_points;  // star point psi angle
+
+    // . relative hover angles
+    pitch = hover_deviation * cos(psi_hover);  // vary theta_output for x direction
+    yaw = hover_deviation * sin(psi_hover);  // vary phi_output_yz for y direction
+
+    // . absolute hover angles
+    request_theta_output_xr_pitch = output_tube_pointing == "down"
+                                        ? swivel_tilt_xr_vertical + pitch
+                                        : swivel_tilt_xr_vertical - pitch;
+    request_phi_output_yz_yaw = phi_output_yz_vertical + yaw;
+
+    // Approximate theta_mid from theta_output
+    echo(request_theta_output_xr_pitch = request_theta_output_xr_pitch);
+    hover_theta_mid = ApproximateThetaMidAsFunctionOfThetaOutputXr(request_theta_output_xr_pitch,
+                                                                   theta_output_xr_f1_ampl,
+                                                                   mid_tube_rotation);
+
+    // Approximate phi_output_yz from approximate theta_mid
+    hover_phi_crosstalk = ApproximatePhiOutputYzAsFunctionOfThetaMid(hover_theta_mid,
+                                                                     phi_output_yz_f1_ampl);
+    // Adjust phi_input_yz for theta_mid crosstalk, to achieve wanted phi_output_yz
+    hover_phi_input_yz = request_phi_output_yz_yaw - hover_phi_crosstalk;
+
+    // Apply hover_phi_input_yz and hover_theta_mid for pitch and yaw
+    FormSwivel(x_input, x_mid, x_output, R_wall_inner, d_wall, alpha_tilt,
+               no_bottom, R_bottom_hole, L_marker, d_marker, h_marker,
+               hover_phi_input_yz, hover_theta_mid);
+
+    if (verbosity > 0) {
+        // Verify swivel status
+        thrust_vector = SwivelThrustVector(alpha_tilt,
+                                           hover_phi_input_yz, hover_theta_mid);
+
+        // pitch
+        hover_pitch_theta_output_zx = fAngleZX(thrust_vector);
+        hover_pitch = toAngle180(hover_pitch_theta_output_zx - theta_output_zx_vertical);
+        hover_pitch_error = toAngle180(pitch - hover_pitch);
+
+        // yaw
+        hover_yaw_phi_output_yz = fAngleYZ(thrust_vector);
+        hover_yaw = toAngle180(hover_yaw_phi_output_yz - phi_output_yz_vertical);
+        hover_yaw_error = toAngle180(yaw - hover_yaw);
+
+        echo(hover_theta_mid = hover_theta_mid);
+        echo(psi_hover = psi_hover,
+             hover_pitch = hover_pitch,
+             hover_yaw = hover_yaw,
+             hover_pitch_error = hover_pitch_error,
+             hover_yaw_error = hover_yaw_error);
+
+        // verify
+        // . tune error margin somewhat as function of alpha_tilt
+        pitch_margin = alpha_tilt <= 25 ? 1.0 : 1.5;
+        yaw_margin = alpha_tilt <= 25 ? 0.1 : 0.15;
+        assert(abs(hover_pitch_error) < pitch_margin, "Too large hover pitch error.");
+        assert(abs(hover_yaw_error) < yaw_margin, "Too large hover yaw error.");
     }
 
 } else if (select_model == 5) {
@@ -533,7 +625,7 @@ if (select_model == 0) {
         assert(abs(transition_phi_output_yz_error) < 0.1, "Too large transition yaw error.");
     }
 
-} else if (select_model == 6) {
+} else if (select_model == 6 || select_model == 6.1) {
     // Show multiple swivel pointings in one view
     step = 60;
     for (theta_mid = [0:step:360-1]) {
@@ -543,8 +635,16 @@ if (select_model == 0) {
                                                                         phi_output_yz, theta_mid);
 
             // Show each phi_input_yz
-            if (step > 15) {
-                FormSwivel(x_input, x_mid, x_output, R_wall_inner, d_wall, alpha_tilt,
+            if (select_model == 6) {
+                if (step > 15) {
+                    // Show swivels, use step > 15 for not too many
+                    FormSwivel(x_input, x_mid, x_output, R_wall_inner, d_wall, alpha_tilt,
+                               no_bottom, R_bottom_hole, L_marker, d_marker, h_marker,
+                               phi_input_yz, theta_mid);
+                }
+            } else if (select_model == 6.1) {
+                // No swivels to verify DiffSwivel() = FormSwivel - FormSwivel_gonio() == NULL
+                DiffSwivel(x_input, x_mid, x_output, R_wall_inner, d_wall, alpha_tilt,
                            no_bottom, R_bottom_hole, L_marker, d_marker, h_marker,
                            phi_input_yz, theta_mid);
             }
@@ -568,10 +668,10 @@ if (select_model == 0) {
                      angles_yz = phi_output_yz, phi_output_yz360, position_angle_yz, thrust_angle_yz);
 
                 if (theta_mid != 0) {
-                    assert(abs(position_angle_yz - thrust_angle_yz) < f_eps,
+                    assert(abs(toAngle180(position_angle_yz - thrust_angle_yz)) < f_eps,
                         "position_angle_yz != thrust_angle_yz");
                     if (abs(position_vector.y) > f_eps || abs(position_vector.z) > f_eps) {
-                        assert(abs(position_angle_yz - phi_output_yz360) < f_eps,
+                        assert(abs(toAngle180(position_angle_yz - phi_output_yz360)) < f_eps,
                             "position_angle_yz != phi_output_yz360");
                     }
                 }
@@ -608,18 +708,17 @@ if (select_model == 0) {
 
 
 } else if (select_model == 8) {
-    // Swing nof_pointings times between less than full up and less than full
+    // Swing nof_star_points times between less than full up and less than full
     // down, and at the same time rotate phi_output_yz full circle to create a
     // star pattern. This is only feasible with jumps in phi_input_yz, when the
     // swivel crosses the horizontal direction (see 3.2).
     // Use max_theta_output as maximum deviation angle of the output thrust
     // vector from horizontal. Use theta_mid is about twice theta_output.
-    nof_pointings = 4;
     max_theta_output = 10;
     max_theta_mid = max_theta_output * 2;
     // . timeline
-    tp = nof_pointings * $t;  // tp time has increased by 1 per pointing
-    ti = floor(tp);  // ti pointing index in range 0 to nof_pointings - 1
+    tp = nof_star_points * $t;  // tp time has increased by 1 per pointing
+    ti = floor(tp);  // ti pointing index in range 0 to nof_star_points - 1
     // . create pointings, using theta_mid is 0 to +max_theta_mid to 0 for each
     //   pointing
     sawtooth_up = 2 * (tp % 1);  // one sawtooth up per pointing
@@ -635,9 +734,9 @@ if (select_model == 0) {
                                                                 phi_output_yz, theta_mid);
 
     // . create star pattern, by rotating phi_input_yz_star by
-    //   360 / nof_pointings, after each pointing
-    phi_input_yz_offset = 360 * ti / nof_pointings;  // rotate in steps
-    //phi_input_yz_offset = 360 * tp / nof_pointings;  // rotate gradually
+    //   360 / nof_star_points, after each pointing
+    phi_input_yz_offset = 360 * ti / nof_star_points;  // rotate in steps
+    //phi_input_yz_offset = 360 * tp / nof_star_points;  // rotate gradually
 
     phi_input_yz_star = phi_input_yz + phi_input_yz_offset;
 
@@ -646,7 +745,7 @@ if (select_model == 0) {
                                            phi_input_yz_star, theta_mid);
         thrust_angle_xr = fAngleXR(thrust_vector);
 
-        echo(nof_pointings = nof_pointings);
+        echo(nof_star_points = nof_star_points);
         echo(ti = ti,
              phi_input_yz_star = phi_input_yz_star,
              theta_mid = theta_mid,
