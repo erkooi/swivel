@@ -183,7 +183,7 @@ Figure 7.2: Excact function theta_output_xr(theta_mid)
 The exact formula for swivel output control is huge, because it has in the order of hundred terms (see SwivelOutputPosition_Gonio() function in swivel_functions.scad). Therefore it may need to be approximated to be able to implement it in a real time application, using e.g.:
 
 * a precalculated lookup table with values from the exact formula,
-* an approximation formula that is close to the exact formula, but much simpler to calculate.
+* an approximation formula that is close to the exact formula, but much simpler to calculate and that also has an inverse function
 
 The function for phi_output_yz(theta_mid) in Figure 7.1 almost linear, the deviation suggests that adding the first harmonic frequency component deviation yields a good approximation. The function for theta_output_xr(theta_mid) in Figure 7.2 looks like the first halve of a sinus, this suggest that the first harmonic frequency component of concat(theta_output_xr(theta_mid), -theta_output_xr(theta_mid)) yields a good approximation. The harmonic components are obtained using the Discrete Fourier Transform (DFT) for real input signals (rDFT). The f1_ampl of the first harmonic follows from the DFT analysis of the exact formula. With analysis and plots from the swivel.ipynb jupyter notebook this results in:
 
