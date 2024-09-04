@@ -53,12 +53,29 @@ echo(thrust_vector = thrust_vector);
 
 
 //------------------------------------------------------------------------------
+// Verify SwivelThrustVector_Gonio() == SwivelThrustVector()
+//------------------------------------------------------------------------------
+echo("Verify SwivelThrustVector_Gonio() == SwivelThrustVector()");
+step_thrust = 30;
+for (theta_mid = [0:step_thrust:360]) {
+    for (phi_input_yz = [0:step_thrust:360]) {
+        thrust_vector       = SwivelThrustVector(      alpha_tilt, phi_input_yz, theta_mid);
+        thrust_vector_gonio = SwivelThrustVector_Gonio(alpha_tilt, phi_input_yz, theta_mid);
+
+        assert(abs(thrust_vector[0] - thrust_vector_gonio[0]) < f_eps, "thrust_vector.x != thrust_vector_gonio.x");
+        assert(abs(thrust_vector[1] - thrust_vector_gonio[1]) < f_eps, "thrust_vector.y != thrust_vector_gonio.y");
+        assert(abs(thrust_vector[2] - thrust_vector_gonio[2]) < f_eps, "thrust_vector.z != thrust_vector_gonio.z");
+    }
+}
+
+
+//------------------------------------------------------------------------------
 // Verify SwivelOutputPosition_Gonio() == SwivelOutputPosition()
 //------------------------------------------------------------------------------
 echo("Verify SwivelOutputPosition_Gonio() == SwivelOutputPosition()");
-step = 30;
-for (theta_mid = [0:step:360]) {
-    for (phi_input_yz = [0:step:360]) {
+step_position = 30;
+for (theta_mid = [0:step_position:360]) {
+    for (phi_input_yz = [0:step_position:360]) {
         position_vector       = SwivelOutputPosition(      x_input, x_mid, x_output, alpha_tilt, phi_input_yz, theta_mid);
         position_vector_gonio = SwivelOutputPosition_Gonio(x_input, x_mid, x_output, alpha_tilt, phi_input_yz, theta_mid);
 

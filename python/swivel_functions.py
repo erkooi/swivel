@@ -351,11 +351,9 @@ def SwivelThrustVector(alpha_tilt, phi_input_yz, theta_mid):
       for YZ angle of the thrust vector when the swivel is straight.
     . Uses matrices.
     . The thrust vector pointing does not depend on x_input, x_mid, x_output,
-      so use fixed 1, 1, 1 and 1, 1, 0 to derive the pointing.
+      so use fixed 0, 0, 1] (- [0, 0, 0] = NULL) to derive the pointing.
     """
-    return \
-        SwivelOutputPosition(1, 1, 1, alpha_tilt, phi_input_yz, theta_mid) - \
-        SwivelOutputPosition(1, 1, 0, alpha_tilt, phi_input_yz, theta_mid)
+    return SwivelOutputPosition(0, 0, 1, alpha_tilt, phi_input_yz, theta_mid)
 
 
 def SwivelThrustVectorsList(alpha_tilt, phi_input_yz_arr, theta_mid_arr):
@@ -377,9 +375,7 @@ def SwivelThrustVector_Gonio(alpha_tilt, phi_input_yz, theta_mid):
     . Equivalent to SwivelThrustVector(), so SwivelThrustVector_Gonio() yields
       same thrust vector.
     """
-    return \
-        SwivelOutputPosition_Gonio(1, 1, 1, alpha_tilt, phi_input_yz, theta_mid) - \
-        SwivelOutputPosition_Gonio(1, 1, 0, alpha_tilt, phi_input_yz, theta_mid)
+    return SwivelOutputPosition_Gonio(0, 0, 1, alpha_tilt, phi_input_yz, theta_mid)
 
 
 ################################################################################
@@ -896,7 +892,7 @@ def _verify_thrust_vector():
     if np.abs(t_vector[0] - 0.6587376961607214) > la.f_eps or \
        np.abs(t_vector[1] - -0.6666267643977856) > la.f_eps or \
        np.abs(t_vector[2] - -0.34881715073287967) > la.f_eps or \
-       np.abs(t_vector[3] - 0.0) > la.f_eps:
+       np.abs(t_vector[3] - 1.0) > la.f_eps:
         print('Wrong t_vector')
         result = False
     if np.abs(la.fAngleYZ(t_vector) - -152.37886965244215) > la.f_eps:

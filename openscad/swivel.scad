@@ -64,6 +64,7 @@ use <swivel_assembly.scad>;
 //
 //   2   FormSwivel() steer theta_mid with InputTube marker at YZ angle = 0
 //   2.1 FormSwivel() animate theta_mid with InputTube marker kept up
+//   2.2 FormSwivel() animate phi_output_yz around vertical
 //
 //   3   FormSwivel() steer theta_mid with OutputTube pointing to phi_output_yz
 //   3.1 FormSwivel() animate theta_mid with OutputTube in ZX plane pointing to phi_output_yz_vertical_down
@@ -280,6 +281,30 @@ if (select_model == 0) {
         // Echo swivel status
         phi_output_yz = toAngle360(fAngleYZ(SwivelOutputPosition(x_input, x_mid, x_output, alpha_tilt,
                                                                  phi_input_yz_for_input_marker_up,
+                                                                 theta_mid)));
+        echo(time = $t);
+        echo(theta_mid = theta_mid);
+        echo(phi_output_yz = phi_output_yz);
+    }
+
+} else if (select_model == 2.2) {
+    theta_mid = 80;  // 0 is straight, 180 is maximum tilted
+    yaw_ampl = 30;
+    yaw_yz = yaw_ampl * sin($t * 360);
+    phi_output_yz = phi_output_yz_vertical + yaw_yz;
+
+    // Determine phi_input_yz for requested phi_output_yz and given theta_mid
+    phi_input_yz = DeterminePhiInputYzForPhiOutputYzAndThetaMid(x_input, x_mid, x_output, alpha_tilt,
+                                                                phi_output_yz, theta_mid);
+    // Apply phi_input_yz
+    FormSwivel(x_input, x_mid, x_output, R_wall_inner, d_wall, alpha_tilt,
+               no_bottom, R_bottom_hole, L_marker, d_marker, h_marker,
+               phi_input_yz, theta_mid);
+
+    if (verbosity > 0) {
+        // Echo swivel status
+        phi_output_yz = toAngle360(fAngleYZ(SwivelOutputPosition(x_input, x_mid, x_output, alpha_tilt,
+                                                                 phi_input_yz,
                                                                  theta_mid)));
         echo(time = $t);
         echo(theta_mid = theta_mid);

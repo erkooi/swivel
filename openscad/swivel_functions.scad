@@ -459,6 +459,30 @@ function SwivelOutputPosition_Gonio(x_input, x_mid, x_output, alpha_tilt, phi_in
 function SwivelThrustVector(alpha_tilt, phi_input_yz, theta_mid) =
     SwivelOutputPosition(0, 0, 1, alpha_tilt, phi_input_yz, theta_mid);
 
+// . Use xi = 0, xm = 0, xo = 1 in SwivelOutputPosition_Gonio(), and remove
+//   unused intermediate variables.
+function SwivelThrustVector_Gonio(alpha_tilt, phi_input_yz, theta_mid) =
+    let(ca = cos(alpha_tilt),
+        sa = sin(alpha_tilt),
+        ct = cos(theta_mid),
+        st = sin(theta_mid),
+        ca2 = ca * ca,
+        ca4 = ca2 * ca2,
+        sa2 = sa * sa,
+        sa4 = sa2 * sa2,
+        ct2 = ct * ct,
+        st2 = st * st,
+        cp = cos(phi_input_yz - c_phi_input_yz_construction),
+        sp = sin(phi_input_yz - c_phi_input_yz_construction),
+        Xo = ca4 + sa4 * ct2 + -sa2 * st2 + ca2 * sa2 * (4 * ct - ct2 - 1),
+        Yo = sa * -st * (ca2 * (2 - ct) + ct * (1 + sa2)),
+        Zo = ca * sa * (st2 + (sa2 - ca2) * (2 * ct - 1 - ct2))
+    )
+    [Xo,
+     cp * Yo + sp * Zo,
+     sp * Yo - cp * Zo,
+     1];
+
 module echo_SwivelThrustVector(alpha_tilt, phi_input_yz, theta_mid, thrust_vector) {
     echo(alpha_tilt = alpha_tilt);
     echo(phi_input_yz = phi_input_yz);
